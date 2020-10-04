@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="VirgoBookView">
+        <attr name="bookTextSize" format="dimension" />
+        <attr name="bookTextColor" format="color|reference" />
+        <attr name="bgColor" format="color|reference" />
+        <attr name="bookDividerHeight" format="dimension|reference" />
+        <attr name="padValue" format="dimension|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="VirgoLrcView">
+        <attr name="lrcTextSizeMain" format="dimension" />
+        <attr name="lrcTextSizeSec" format="dimension" />
+        <attr name="lrcTextColorMain" format="color|reference" />
+        <attr name="lrcTextColorSec" format="color|reference" />
+        <attr name="lrcDividerHeight" format="dimension|reference" />
+        <attr name="lrcpadValue" format="dimension|reference" />
+    </declare-styleable>
+</resources>
