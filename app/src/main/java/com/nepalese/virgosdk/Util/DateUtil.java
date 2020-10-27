@@ -6,10 +6,13 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.SystemClock;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 public class DateUtil {
     public static String date2String(Date date, String type){//yyyy-MM-dd HH:mm:ss
@@ -142,10 +145,7 @@ public class DateUtil {
      * @param l          日期选择监听
      * @param calendar   日历对象, 用于赋值初始时间
      */
-    public static void showDatePicker(Context context,
-                                      int themeResId,
-                                      DatePickerDialog.OnDateSetListener l,
-                                      Calendar calendar) {
+    public static void showDatePicker(Context context, int themeResId, DatePickerDialog.OnDateSetListener l, Calendar calendar) {
         new DatePickerDialog(context
                 , themeResId //风格
                 , l // 监听
@@ -161,10 +161,7 @@ public class DateUtil {
      * @param l          时间选择监听
      * @param calendar   日历对象, 用于赋值初始时间
      */
-    public static void showTimePicker(Context context,
-                                      int themeResId,
-                                      TimePickerDialog.OnTimeSetListener l,
-                                      Calendar calendar) {
+    public static void showTimePicker(Context context, int themeResId, TimePickerDialog.OnTimeSetListener l, Calendar calendar) {
         new TimePickerDialog(context
                 , themeResId // 设置风格
                 , l // 绑定监听器
@@ -173,5 +170,25 @@ public class DateUtil {
                 // true表示采用24小时制
                 , true)
                 .show();
+    }
+
+    public static void timeSynchronization(Date ServiceTime){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String datetime=sdf.format(ServiceTime);
+
+        ArrayList<String> envlist = new ArrayList<>();
+        Map<String, String> env = System.getenv();
+        for (String envName : env.keySet()) {
+            envlist.add(envName + "=" + env.get(envName));
+        }
+        String[] envp = envlist.toArray(new String[0]);
+        String command;
+        command = "date -s\""+datetime+"\"";
+        try {
+            Runtime.getRuntime().exec(new String[] { "su", "-c", command }, envp);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }
