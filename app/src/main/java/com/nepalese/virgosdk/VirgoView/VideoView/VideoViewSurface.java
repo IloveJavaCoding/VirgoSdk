@@ -23,7 +23,7 @@ import java.util.List;
  * @usage
  */
 public class VideoViewSurface extends SurfaceView {
-    private static final String TAG = "SecondVideoViewSurface";
+    private static final String TAG = "VideoViewSurface";
 
     private static final int TYPE_FILE = 0;//本地文件
     private static final int TYPE_URL = 1;//网络视频

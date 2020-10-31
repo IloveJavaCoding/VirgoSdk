@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.widget.MediaController;
 
 import androidx.annotation.NonNull;
 
@@ -17,8 +16,8 @@ import java.util.List;
  * @author nepalese on 2020/9/18 11:11
  * @usage
  */
-public class VirgoVideoViewChild extends VirgoVideoView {
-    private static final String TAG = "VideoView";
+public class VirgoVideoViewTextureChild extends VirgoVideoViewTexture {
+    private static final String TAG = "VirgoVideoTextureChild";
 
     private Context context;
 
@@ -27,15 +26,15 @@ public class VirgoVideoViewChild extends VirgoVideoView {
     private boolean hasSetUrl = false;
     private boolean hasPause = false;
 
-    public VirgoVideoViewChild(Context context) {
+    public VirgoVideoViewTextureChild(Context context) {
         this(context, null);
     }
 
-    public VirgoVideoViewChild(Context context, AttributeSet attrs) {
+    public VirgoVideoViewTextureChild(Context context, AttributeSet attrs) {
         this(context, attrs,0);
     }
 
-    public VirgoVideoViewChild(Context context, AttributeSet attrs, int defStyleAttr) {
+    public VirgoVideoViewTextureChild(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
         init();
@@ -63,17 +62,17 @@ public class VirgoVideoViewChild extends VirgoVideoView {
         setSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
             @Override
             public void onVideoSizeChanged(MediaPlayer mediaPlayer, int w, int h) {
-                if(w>1920 || h>1080){
+                if (w > 1920 || h > 1080) {
                     Log.e(TAG, "big resolution!");
-//                load();
+                    load();
                 }
             }
         });
         //设置系统默认的视频控制器（时间条，播放、暂停，前进、后退）
-        setMediaController(new MediaController(context));
+//        setMediaController(new MediaController(context));
     }
 
-    public VirgoVideoViewChild setUrl(List<String> urls) {
+    public VirgoVideoViewTextureChild setUrl(List<String> urls) {
         if (urls != null && !urls.isEmpty()) {
             url = urls;
             hasSetUrl = true;

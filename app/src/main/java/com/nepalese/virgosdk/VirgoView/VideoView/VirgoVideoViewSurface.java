@@ -24,8 +24,15 @@ import java.util.Map;
  * @author nepalese on 2020/9/18 08:59
  * @usage 自定义视频播放器
  */
-public class VirgoVideoView extends SurfaceView implements MediaController.MediaPlayerControl {//MediaController.MediaPlayerControl
-    private static final String TAG = "VirgoVideoView";
+public class VirgoVideoViewSurface extends SurfaceView implements MediaController.MediaPlayerControl {
+    private static final String TAG = "VirgoVideoViewSurface";
+
+    public static final String SCALE_TYPE_FIT_PARENT = "fitParent";
+    public static final String SCALE_TYPE_FILL_PARENT = "fillParent";
+    public static final String SCALE_TYPE_WRAP_CONTENT = "wrapContent";
+    public static final String SCALE_TYPE_FIT_XY = "fitXY";
+    public static final String SCALE_TYPE_16_9 = "16:9";
+    public static final String SCALE_TYPE_4_3 = "4:3";
 
     //播放器当前状态
     private static final int STATE_ERROR = -1;//报错
@@ -51,31 +58,35 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
     private MediaPlayer mediaPlayer;
     private SurfaceHolder surfaceHolder;//画面支持
     private AudioManager audioManager;//音量控制服务
-    //todo 控制器， 音频
     private MediaController mediaController;//系统默认视频控制器
     private int audioFocusType = AudioManager.AUDIOFOCUS_GAIN; //音频焦点
 
     private int videoWidth, videoHeight;//视频分辨率
-    private int surfaceWidth, surfaceHeight;//实际有效的画面显示宽高
+    private int surfaceWidth, surfaceHeight;//surface显示像素
 
     private int curPosition;//播放状态下当前位置
     private int seekWhenPrepared;//准备状态下的
     private float volume;//音量
+
+    //视频填充变量
+    private static final int[] allAspectRatio = new int[]{0, 1, 2, 3, 4, 5};
+    private int mCurrentAspectRatioIndex;
+    private int mCurrentAspectRatio;
 
     //有初始化变量
     private int curState = STATE_IDLE;//当前状态
     private int aimState = STATE_IDLE;//期望状态
     private boolean isLooping = false;//循环播放
 
-    public VirgoVideoView(Context context) {
+    public VirgoVideoViewSurface(Context context) {
         this(context, null);
     }
 
-    public VirgoVideoView(Context context, AttributeSet attrs) {
+    public VirgoVideoViewSurface(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public VirgoVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public VirgoVideoViewSurface(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
         init();
@@ -88,6 +99,7 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
 
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         getHolder().addCallback(onCallback);
+//        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         //设置焦点
         setFocusable(true);
@@ -156,7 +168,7 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
         } else {
             // no size yet, just adopt the given spec sizes
         }
-        Log.i(TAG, "onMeasure after: width = " + width + "\theight = " + height);
+        Log.d(TAG, "onMeasure after: width = " + width + "\theight = " + height);
         setMeasuredDimension(width, height);
     }
 
@@ -238,18 +250,21 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
 
     //静音
     public void setMute(boolean isOn){
-        if(audioManager!=null){
-            if(isOn){
-                audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-            }else{
-                audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+        Log.d(TAG, "setMute: " + isOn);
+        if(isOn){
+            setVolume(0f);
+        }else{
+            if(audioManager!=null){
+                setVolume(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));//当前系统音量
             }
         }
     }
 
-    //设置音量
+    //设置音量, 在start之后起作用
+    //参数是0.0～1.0, 0.0是没有声音的, 0.0~1.0对应声音是按对数变化的
     public void setVolume(float volume) {
-        if (this.mediaPlayer != null) {
+        if (isInPlaybackState()) {
+            Log.d(TAG, "setVolume: " + volume);
             this.mediaPlayer.setVolume(volume, volume);
         }
     }
@@ -273,6 +288,34 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
         }
         this.mediaController = mediaController;
         attachMediaController();
+    }
+
+    //画面填充格式
+    public void setScaleType(String scaleType) {
+        switch (scaleType){
+            case SCALE_TYPE_FIT_PARENT:
+                setAspectRatio(0);
+                break;
+            case SCALE_TYPE_FILL_PARENT:
+                setAspectRatio(1);
+                break;
+            case SCALE_TYPE_WRAP_CONTENT:
+                setAspectRatio(2);
+                break;
+            case SCALE_TYPE_FIT_XY:
+                setAspectRatio(3);
+                break;
+            case SCALE_TYPE_16_9:
+                setAspectRatio(4);
+                break;
+            case SCALE_TYPE_4_3:
+                setAspectRatio(5);
+                break;
+        }
+    }
+
+    private void setAspectRatio(int aspectRatio) {
+        //todo
     }
 
     //========================================================private===============================================
@@ -316,6 +359,7 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
             mediaPlayer.setOnErrorListener(onErrorListener);
             mediaPlayer.setOnInfoListener(onInfoListener);
             mediaPlayer.setOnBufferingUpdateListener(onBufferingUpdateListener);
+
             curBufferPercentage = 0;
             if (Build.VERSION.SDK_INT > 14) {
                 mediaPlayer.setDataSource(context, videoUri, header);
@@ -323,6 +367,7 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
                 mediaPlayer.setDataSource(videoUri.toString());
             }
             mediaPlayer.setDisplay(surfaceHolder);
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setScreenOnWhilePlaying(true);
             mediaPlayer.prepareAsync();
 
@@ -526,20 +571,37 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
                 mediaController.setEnabled(true);
             }
 
+            videoWidth = mp.getVideoWidth();
+            videoHeight = mp.getVideoHeight();
+
             int seekToPosition = seekWhenPrepared;  // mSeekWhenPrepared may be changed after seekTo() call
             if (seekToPosition != 0) {
                 seekTo(seekToPosition);
             }
 
-            if (aimState == STATE_PLAYING) {
-                start();
-                if (mediaController != null) {
-                    mediaController.show();
-                } else if (!isPlaying() && (seekToPosition != 0 || getCurrentPosition() > 0)) {
-                    if (mediaController != null) {
-                        // Show the media controls when we're paused into a video and make 'em stick.
-                        mediaController.show(0);
+            if (videoWidth != 0 && videoHeight != 0) {
+                getHolder().setFixedSize(videoWidth, videoHeight);
+                if (surfaceWidth == videoWidth && surfaceHeight == videoHeight) {
+                    // We didn't actually change the size (it was already at the size
+                    // we need), so we won't get a "surface changed" callback, so
+                    // start the video here instead of in the callback.
+                    if (aimState == STATE_PLAYING) {
+                        start();
+                        if (mediaController != null) {
+                            mediaController.show();
+                        } else if (!isPlaying() && (seekToPosition != 0 || getCurrentPosition() > 0)) {
+                            if (mediaController != null) {
+                                // Show the media controls when we're paused into a video and make 'em stick.
+                                mediaController.show(0);
+                            }
+                        }
                     }
+                }
+            } else {
+                // We don't know the video size yet, but should start anyway.
+                // The video size might be reported to us later.
+                if (aimState == STATE_PLAYING) {
+                    start();
                 }
             }
         }
@@ -605,7 +667,7 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
                         .setMessage(msg)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int whichButton) {
+                            public void onClick(DialogInterface dialogInterface, int i) {
                                 if (completionListener != null) {
                                     completionListener.onCompletion(mediaPlayer);
                                 }
@@ -622,16 +684,16 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
     private MediaPlayer.OnVideoSizeChangedListener onVideoSizeChangedListener = new MediaPlayer.OnVideoSizeChangedListener() {
         @Override
         public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-            Log.i(TAG, "onVideoSizeChanged: width = " + width + "\theight = " + height);
-            Log.i(TAG, "onVideoSizeChanged: MediaPlayer width = " + mp.getVideoWidth() + "\theight = " + mp.getVideoHeight());
+            Log.d(TAG, "onVideoSizeChanged: width = " + width + "\theight = " + height);
+            Log.d(TAG, "onVideoSizeChanged: MediaPlayer width = " + mp.getVideoWidth() + "\theight = " + mp.getVideoHeight());
 
-//            videoWidth = mp.getVideoWidth();
-//            videoHeight = mp.getVideoHeight();
-//
-//            if (videoWidth != 0 && videoHeight != 0) {
-//                getHolder().setFixedSize(videoWidth, videoHeight);
-//                requestLayout();
-//            }
+            videoWidth = mp.getVideoWidth();
+            videoHeight = mp.getVideoHeight();
+
+            if (videoWidth != 0 && videoHeight != 0) {
+                getHolder().setFixedSize(videoWidth, videoHeight);//修改surface 显示分辨率
+                requestLayout();
+            }
 
             if(sizeChangedListener!=null){
                 sizeChangedListener.onVideoSizeChanged(mediaPlayer, width, height);
@@ -650,14 +712,18 @@ public class VirgoVideoView extends SurfaceView implements MediaController.Media
             openVideo();
         }
 
+        //分配给视频控件的size
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            Log.i(TAG, "surfaceChanged: width = " + width + "\theight = " +  height);
+            Log.d(TAG, "surfaceChanged: width = " + width + "\theight = " +  height);
             surfaceWidth = width;
             surfaceHeight = height;
 
             boolean isValidState = (aimState == STATE_PLAYING);
-            if (mediaPlayer != null && isValidState) {
+            boolean isValidSize = (videoWidth == width && videoHeight == height);
+            Log.d(TAG, "surfaceChanged: 视频分辨率与显示分辨率大小是否一致：" + isValidSize);//默认显示分辨率为显示大小
+
+            if (mediaPlayer != null && isValidState && isValidSize) {
                 if (seekWhenPrepared != 0) {
                     seekTo(seekWhenPrepared);
                 }
