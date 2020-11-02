@@ -19,7 +19,7 @@
             android:layout_weight="1"
             android:text="curPath"
             android:textSize="@dimen/text_size_18"
-            android:textColor="@color/black"
+            android:textColor="@color/colorBlack"
             android:singleLine="true"
             android:ellipsize="middle"/>
 
