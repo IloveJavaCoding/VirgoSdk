@@ -707,7 +707,7 @@ public class VirgoVideoViewSurface extends SurfaceView implements MediaControlle
         public void surfaceCreated(SurfaceHolder holder) {
             surfaceHolder = holder;
             if(callback!=null){
-                callback.surfaceCreated(surfaceHolder);
+                callback.surfaceCreated(holder);
             }
             openVideo();
         }
@@ -735,7 +735,7 @@ public class VirgoVideoViewSurface extends SurfaceView implements MediaControlle
         public void surfaceDestroyed(SurfaceHolder holder) {
             surfaceHolder = null;
             if(callback!=null){
-                callback.surfaceDestroyed(surfaceHolder);
+                callback.surfaceDestroyed(holder);
             }
             release();
         }
