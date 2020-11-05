@@ -32,7 +32,7 @@ import java.util.Map;
  * @author nepalese on 2020/9/18 08:59
  * @usage 自定义视频播放器
  * ：使用texture，可旋转，移动， 显示大小根据控件大小自适应
- * ：无法播放高分辨率视频（1k以上）
+ * ：无法播放高分辨率视频（1k以上）, 可能与设备最大支持分辨率有关
  */
 public class VirgoVideoViewTexture extends TextureView implements MediaController.MediaPlayerControl {
     private static final String TAG = "VirgoVideoViewTexture";
