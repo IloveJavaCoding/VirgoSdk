@@ -70,6 +70,7 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
     private int flag = FLAG_FILE;//默认选择文件
     private String rootPath = DEFAULT_ROOT_PATH;
     private String fileType = TYPE_ALL;
+    private int dialogHeight = 500;//默认弹框高度
 
     public VirgoFileSelectorDialog(@NonNull Context context) {
         //默认自定义弹框样式，使用下面的构造函数可另设样式
@@ -99,7 +100,6 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
 
         setContentView(view);
         setListener();
-        setLayout();
     }
 
     private void setLayout() {
@@ -122,7 +122,7 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
          */
 
 //        lp.width = 300; // 宽度
-        lp.height = 500; // 高度
+        lp.height = dialogHeight; // 高度
         lp.alpha = 0.8f; // 透明度
 
         dialogWindow.setAttributes(lp);
@@ -131,6 +131,7 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
     //==============================================================================================
     //初始化数据
     private void setData() {
+        setLayout();//设置弹框布局
         curPath = rootPath;
         tvCurPath.setText(curPath);
         files  = new ArrayList(getFiles(curPath));
@@ -265,6 +266,10 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
 
     public void setCallback(SelectFileCallback callback) {
         this.callback = callback;
+    }
+
+    public void setDialogHeight(int dialogHeight) {
+        this.dialogHeight = dialogHeight;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
