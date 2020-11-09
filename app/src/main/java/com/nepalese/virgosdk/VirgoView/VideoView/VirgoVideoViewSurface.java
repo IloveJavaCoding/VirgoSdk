@@ -263,7 +263,10 @@ public class VirgoVideoViewSurface extends SurfaceView implements MediaControlle
     //设置音量, 在start之后起作用
     //参数是0.0～1.0, 0.0是没有声音的, 0.0~1.0对应声音是按对数变化的
     public void setVolume(float volume) {
-        if (isInPlaybackState()) {
+        if(volume>=0){
+            this.volume = volume;
+        }
+        if (mediaPlayer!=null) {
             Log.d(TAG, "setVolume: " + volume);
             this.mediaPlayer.setVolume(volume, volume);
         }

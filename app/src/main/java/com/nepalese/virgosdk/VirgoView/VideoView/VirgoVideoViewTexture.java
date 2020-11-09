@@ -278,7 +278,10 @@ public class VirgoVideoViewTexture extends TextureView implements MediaControlle
 
     //设置音量
     public void setVolume(float volume) {
-        if (isInPlaybackState()) {
+        if(volume>=0){
+            this.volume = volume;
+        }
+        if (mediaPlayer!=null) {
             Log.d(TAG, "setVolume: " + volume);
             this.mediaPlayer.setVolume(volume, volume);
         }
