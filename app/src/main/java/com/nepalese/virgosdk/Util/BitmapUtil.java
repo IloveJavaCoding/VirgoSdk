@@ -1,7 +1,5 @@
 package com.nepalese.virgosdk.Util;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +9,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -24,8 +23,6 @@ import android.renderscript.ScriptIntrinsicBlur;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
-import android.view.animation.LinearInterpolator;
-import android.widget.ImageView;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,6 +36,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * @author nepalese on 2020/10/10 10:41
+ * @usage  bitmap 与 drawable, String, byte[] 互转, 从资源文件，本地文件读取bitmap，将bitmap存储到本地文件
+ * bitmap 操作：压缩，旋转，（圆形）裁剪，缩放，模糊，透明 ...
+ */
 public class BitmapUtil {
     private static final String TAG = "BitmapUtil";
 
@@ -60,25 +62,14 @@ public class BitmapUtil {
         return null;
     }
 
-    //string <--> bitmap
-    public static String bitmap2String(Bitmap bitmap){
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        byte[] bytes = stream.toByteArray();
-
-        try {
-            stream.flush();
-            stream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return Base64.encodeToString(bytes, Base64.DEFAULT);
-    }
-
-    public static Bitmap string2Bitmap(String data){
-        byte[] bits = Base64.decode(data, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(bits,0, bits.length);
+    public static Bitmap drawable2Bitmap2(Drawable drawable) {
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(),
+                drawable.getAlpha() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     //byte[] <--> Bitmap
@@ -86,7 +77,16 @@ public class BitmapUtil {
         if (bitmap == null) return new byte[0];
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        return baos.toByteArray();
+        byte[] bytes = baos.toByteArray();
+
+        try {
+            baos.flush();
+            baos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return bytes;
     }
 
     public static Bitmap bytes2Bitmap(byte[] bytes) {
@@ -96,12 +96,22 @@ public class BitmapUtil {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
-    /**
-     * get bitmap from res file
-     * @param context
-     * @param id 资源文件id
-     * @return
-     */
+    //string <--> bitmap
+    public static String bitmap2String(Bitmap bitmap){
+        if (bitmap == null) return null;
+
+        byte[] bytes = bitmap2Bytes(bitmap);
+        return Base64.encodeToString(bytes, Base64.DEFAULT);
+    }
+
+    public static Bitmap string2Bitmap(String data){
+        byte[] bytes = Base64.decode(data, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(bytes,0, bytes.length);
+    }
+
+
+    //======================================bitmap 获取=============================================
+    //从资源文件中获取bitmap
     public static Bitmap getBitmapFromRes(Context context, int id){
         return BitmapFactory.decodeResource(context.getResources(), id);
     }
@@ -114,13 +124,16 @@ public class BitmapUtil {
         return bitmaps;
     }
 
-    //======================================bitmap 存储与读取========================================
-    //从文件中读取bitmap
-    public static Bitmap getBitmapFromFile(String path){
-        if(TextUtils.isEmpty(path)){
+    /**
+     * 从文件中读取bitmap
+     * @param filePath 文件（图片）绝对路径
+     * @return bitmap
+     */
+    public static Bitmap getBitmapFromFile(String filePath){
+        if(TextUtils.isEmpty(filePath)){
             return null;
         }
-        File file = new File(path);
+        File file = new File(filePath);
         if(!file.exists()){
             return null;
         }
@@ -128,7 +141,7 @@ public class BitmapUtil {
         FileInputStream inputStream;
         Bitmap bitmap = null;
         try {
-            inputStream = new FileInputStream(path);
+            inputStream = new FileInputStream(filePath);
             bitmap = BitmapFactory.decodeStream(inputStream);
             inputStream.close();
         } catch (IOException e) {
@@ -138,22 +151,24 @@ public class BitmapUtil {
         return bitmap;
     }
 
+
+    //======================================bitmap 存储=============================================
     /**
-     * 存储Bitmap到本地
+     * 存储Bitmap到本地, 若文件存在则会先删除，再创建新的
      * @param bitmap
      * @param path 本地路径
      * @param fileName 存储文件名
      */
-    public static void bitmap2Local(Bitmap bitmap, String path, String fileName){
-        File file = new File(path+"/"+fileName);
+    public static void saveBitmap2File(Bitmap bitmap, String path, String fileName){
+        File file = new File(path+File.separator+fileName);
         if(file.exists()){
             file.delete();
         }
         try {
             file.createNewFile();
             FileOutputStream outputStream = new FileOutputStream(file);
-            //这里输出问jpg文件，可更改如：png
-            bitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+            //PNG is lossless, so quality is ignored.
+            bitmap.compress(Bitmap.CompressFormat.PNG,100, outputStream);
             outputStream.flush();
             outputStream.close();
         } catch (IOException e) {
@@ -161,36 +176,48 @@ public class BitmapUtil {
         }
     }
 
+
     //=========================================bitmap 操控==========================================
     /**
      * 质量压缩图片方法
-     * @param bitmap    图片
-     * @param limitSize 大于多少 k 就压缩。
-     * @return 图片
+     * @param bitmap  原始 bitmap
+     * @param limitSize 大于多少 kb 就压缩。
+     * @return bitmap
      */
     public static Bitmap compressBitmap(Bitmap bitmap, int limitSize) {
         if (bitmap == null) return null;
         if (limitSize < 1) limitSize = 1;
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        //质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
-        //第一个参数： 图片格式 ，第二个参数： 图片质量，100为最高，0为最差  ，第三个参数：保存压缩后的数据的流
+        //quality: 100为最高(不压缩)，0为最差
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         int options = 100;
 
-        //循环判断如果压缩后图片是否大于compressNum KB,大于继续压缩
+        //循环判断如果压缩后图片是否大于limitSize,大于则继续压缩， 最多压缩80%
         while (baos.toByteArray().length / 1024 > limitSize && options > 20) {
             baos.reset();//即清空baos
             options -= 10;//每次都减少10
             bitmap.compress(Bitmap.CompressFormat.JPEG, options, baos);//这里压缩options%，把压缩后的数据存放到baos中
         }
-        ByteArrayInputStream isBm = new ByteArrayInputStream(baos.toByteArray());//把压缩后的数据baos存放到ByteArrayInputStream中
-        return BitmapFactory.decodeStream(isBm, null, null);//把ByteArrayInputStream数据生成图片
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        Bitmap out = BitmapFactory.decodeStream(bais, null, null);
+
+        //关闭流
+        try {
+            baos.flush();
+            baos.close();
+            bais.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return out;
     }
 
     /**
      * 设置图片旋转度, 以及镜像情况,( 将图片按照某个角度进行旋转, 然后再镜像)
-     * @param bitmap     需要旋转的图片
-     * @param degree 旋转角度
+     * @param bitmap  需要旋转的图片
+     * @param degree  旋转角度
      * @param scaleType 旋转轴
      * @return 旋转后的图片
      */
@@ -208,30 +235,30 @@ public class BitmapUtil {
         } else if (scaleType == ScaleType.HORIZONTAL) { //水平方向翻转
             matrix.postScale(-1, 1);
         }
+
         try {
             // 将原始图片按照旋转矩阵进行旋转，并得到新的图片
-            Bitmap returnBm = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            Bitmap out = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            //将原bitmap回收
             bitmap.recycle();
-            return returnBm;
+            return out;
         } catch (OutOfMemoryError e) {
-            Log.e(TAG, "创建图片异常：" + e);
+            e.printStackTrace();
             gc();
             return bitmap;
         }
     }
 
-    public static Bitmap rotateBitmap(Bitmap bitmap, final int degree){
+    //仅旋转bitmap
+    public static Bitmap rotateBitmap(Bitmap bitmap, int degree){
         if(degree%360 == 0){
             return bitmap;
         }
 
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-
         Matrix matrix = new Matrix();
-        matrix.setRotate(degree, w/2, h/2);
-        Bitmap newBm = Bitmap.createBitmap(bitmap,0,0, w, h, matrix,true);//bg
+        matrix.postRotate(degree % 360);
 
+        Bitmap newBm = Bitmap.createBitmap(bitmap,0,0, bitmap.getWidth(), bitmap.getHeight(), matrix,true);//bg
         if(newBm!=bitmap){
             bitmap.recycle();
         }
@@ -245,6 +272,7 @@ public class BitmapUtil {
      * @return
      */
     public static Bitmap getCircleBitmap(Bitmap bitmap){
+        //先进行修剪（非正方形图片）
         bitmap = cutBitmap(bitmap);
 
         int w = bitmap.getWidth();
@@ -269,11 +297,7 @@ public class BitmapUtil {
         return aimBm;
     }
 
-    /**
-     * 裁剪正方形图片
-     * @param bitmap
-     * @return
-     */
+    // 裁剪正方形图片(以长宽中小的为边长）
     public static Bitmap cutBitmap(Bitmap bitmap){
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
@@ -351,7 +375,7 @@ public class BitmapUtil {
      * @param amiH 想要的高度
      * @return
      */
-    public static Bitmap zoomBitmap(Bitmap bitmap, int aimW, int amiH){
+    public static Bitmap scaleBitmap(Bitmap bitmap, int aimW, int amiH){
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         float scaleW = (float)aimW/width ;
@@ -366,20 +390,7 @@ public class BitmapUtil {
         return newBm;
     }
 
-    public static Bitmap scaleBitmap(Bitmap bitmap, final float scale){
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        Matrix matrix = new Matrix();
-        matrix.postScale(scale,scale);
-
-        Bitmap newBm = Bitmap.createBitmap(bitmap,0,0,width,height,matrix,true);
-        bitmap.recycle();
-
-        return newBm;
-    }
-
-    public static Bitmap scaleBitmap(Bitmap bitmap, int aimW, int aimH){
+    public static Bitmap scaleBitmap2(Bitmap bitmap, int aimW, int aimH){
         if(bitmap.getWidth()==aimW && bitmap.getHeight()==aimH){
             return bitmap;
         }
@@ -392,13 +403,31 @@ public class BitmapUtil {
         return aimBm;
     }
 
-    //模糊
-    private static final float BITMAP_SCALE = 0.4f;
-    //25f是最大模糊度
-    public static Bitmap blurBitmap(Context context, Bitmap bitmap, float degree){
+    public static Bitmap scaleBitmap(Bitmap bitmap, float scale){
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale,scale);
+
+        Bitmap newBm = Bitmap.createBitmap(bitmap,0,0,width,height,matrix,true);
+        bitmap.recycle();
+
+        return newBm;
+    }
+
+    /**
+     * 高斯模糊
+     * @param context
+     * @param bitmap
+     * @param degree 25f是最大模糊度
+     * @param scale  图片缩放比例: 0.4f
+     * @return
+     */
+    public static Bitmap blurBitmap(Context context, Bitmap bitmap, float degree, float scale){
         // 计算图片缩小后的长宽
-        int width = Math.round(bitmap.getWidth() * BITMAP_SCALE);
-        int height = Math.round(bitmap.getHeight() * BITMAP_SCALE);
+        int width = Math.round(bitmap.getWidth() * scale);
+        int height = Math.round(bitmap.getHeight() * scale);
 
         // 将缩小后的图片做为预渲染的图片
         Bitmap inputBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
@@ -425,35 +454,47 @@ public class BitmapUtil {
         // 将数据填充到Allocation中
         tmpOut.copyTo(outputBitmap);
 
+        //回收：
+        bitmap.recycle();
+        inputBitmap.recycle();
+
         return outputBitmap;
     }
 
-    //使用时，将图片缩小后再使用，避免oom
-    public static Bitmap fastBlurBitmap(Bitmap sentBitmap, int radius) {//200
-        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
+    /**
+     * 使用时，将图片缩小后再使用，避免oom
+     * @param bitmap
+     * @param radius 模糊半径：200
+     * @return
+     */
+    public static Bitmap blurBitmap(Bitmap bitmap, int radius) {
         if (radius < 1) {
-            return (null);
+            return null;
         }
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
+
+        Bitmap outBitmap = bitmap.copy(bitmap.getConfig(), true);
+        bitmap.recycle();
+
+        int w = outBitmap.getWidth();
+        int h = outBitmap.getHeight();
 
         int[] pix = new int[w * h];
-        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+        outBitmap.getPixels(pix, 0, w, 0, 0, w, h);
 
         int wm = w - 1;
         int hm = h - 1;
         int wh = w * h;
         int div = radius + radius + 1;
 
-        int r[] = new int[wh];
-        int g[] = new int[wh];
-        int b[] = new int[wh];
+        int[] r = new int[wh];
+        int[] g = new int[wh];
+        int[] b = new int[wh];
         int rsum, gsum, bsum, x, y, i, p, yp, yi, yw;
-        int vmin[] = new int[Math.max(w, h)];
+        int[] vmin = new int[Math.max(w, h)];
 
         int divsum = (div + 1) >> 1;
         divsum *= divsum;
-        int dv[] = new int[256 * divsum];
+        int[] dv = new int[256 * divsum];
         for (i = 0; i < 256 * divsum; i++) {
             dv[i] = (i / divsum);
         }
@@ -623,23 +664,23 @@ public class BitmapUtil {
             }
         }
 
-        bitmap.setPixels(pix, 0, w, 0, 0, w, h);
-        return (bitmap);
+        outBitmap.setPixels(pix, 0, w, 0, 0, w, h);
+        return outBitmap;
     }
 
     /**
-     * set alpha of image
+     * 设置图片透明度
      * @param bitmap
-     * @param alpha 0-100
+     * @param alpha 0-255（越小越透明）
      * @return
      */
-    public static Bitmap setAlpha(Bitmap bitmap, int alpha){
+    public static Bitmap setBitmapAlpha(Bitmap bitmap, int alpha){
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
         int[] pixels = new int[w * h];
         bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
 
-        alpha = alpha / 100 * 255;
+        //alpha = alpha / 100 * 255;
         for(int i=0; i<pixels.length; i++){
             pixels[i] = (alpha<<24) | (pixels[i] & 0x00ffffff);
         }
@@ -649,6 +690,8 @@ public class BitmapUtil {
         return bitmap;
     }
 
+
+    //==========================================other===============================================
     /**
      * 设置图片效果，根据色调，饱和度，亮度来调节图片效果, 会创建新图
      * @param bitmap:要处理的图像
@@ -657,9 +700,9 @@ public class BitmapUtil {
      * @param lum:亮度
      */
     public static Bitmap bitmapEffect(Bitmap bitmap, float hue, float saturation, float lum) {
-        hue = hue < -180.0f ? -180.0f : hue > 180.0f ? 180.0f : hue;
-        saturation = saturation < 0.0f ? 0.0f : saturation > 2.0f ? 2.0f : saturation;
-        lum = lum < 0.0f ? 0.0f : lum > 2.0f ? 2.0f : lum;
+        hue = hue < -180.0f ? -180.0f : Math.min(hue, 180.0f);
+        saturation = saturation < 0.0f ? 0.0f : Math.min(saturation, 2.0f);
+        lum = lum < 0.0f ? 0.0f : Math.min(lum, 2.0f);
 
         Bitmap bmp = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmp);
@@ -684,37 +727,9 @@ public class BitmapUtil {
         paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
         canvas.drawBitmap(bitmap, 0, 0, paint);
 
+        //回收
+        bitmap.recycle();
         return bmp;
-    }
-
-    //==========================================other===============================================
-    //get color in the bitmap
-    public static List<Integer> colorCapture4Bitmap(Bitmap bitmap){
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-        int[] pixels = new int[w * h];
-        HashMap<Integer, Integer> colors = new HashMap<>();
-        TreeMap<Integer, Integer> sortedColors = new TreeMap<>();
-        List<Integer> result = new ArrayList<>();
-        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
-        for (int pixel : pixels) {
-            Integer num = colors.get(pixel);
-            if (num == null) {
-                colors.put(pixel, 1);
-            } else {
-                num += 1;
-                colors.put(pixel, num);
-            }
-        }
-        for (Map.Entry<Integer, Integer> entry : colors.entrySet()) {
-            sortedColors.put(entry.getValue(), entry.getKey());
-        }
-        for (Map.Entry<Integer, Integer> entry : sortedColors.entrySet()) {
-            result.add(entry.getValue());
-            Log.d("bitmapUtil", "run: color:"+entry.getValue()+",count:"+entry.getKey());
-        }
-
-        return result;
     }
 
     /**
@@ -759,51 +774,11 @@ public class BitmapUtil {
         return type;
     }
 
-    /**
-     * 回收
-     */
-    public static void gc() {
+    //回收
+    private static void gc() {
         System.gc();
         // 表示java虚拟机会做一些努力运行已被丢弃对象（即没有被任何对象引用的对象）的 finalize
         // 方法，前提是这些被丢弃对象的finalize方法还没有被调用过
         System.runFinalization();
     }
-
-    /**
-     * rotate ImageView
-     * @param imgView
-     * @param duration 转一圈时长
-     * @return
-     */
-    public static ObjectAnimator rotateIV(ImageView imgView, int duration){
-        ObjectAnimator animator = ObjectAnimator.ofFloat(imgView, "rotation", 0f,360f);
-        animator.setDuration(duration);
-        animator.setInterpolator(new LinearInterpolator());
-        animator.setRepeatMode(ValueAnimator.RESTART);
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-
-        return animator;
-    }
-
-    /**
-     * public void startRotateAnimation() {
-     *         mRotateAnimator.cancel();
-     *         mRotateAnimator.start();
-     *     }
-     *
-     *     public void cancelRotateAnimation() {
-     *         mLastAnimationValue = 0;
-     *         mRotateAnimator.cancel();
-     *     }
-     *
-     *     public void pauseRotateAnimation() {
-     *         mLastAnimationValue = mRotateAnimator.getCurrentPlayTime();
-     *         mRotateAnimator.cancel();
-     *     }
-     *
-     *     public void resumeRotateAnimation() {
-     *         mRotateAnimator.start();
-     *         mRotateAnimator.setCurrentPlayTime(mLastAnimationValue);
-     *     }
-     */
 }

@@ -36,7 +36,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/colorGery"/>
+        android:background="@color/colorGray"/>
 
     <LinearLayout
         android:id="@+id/layoutBack"
@@ -71,7 +71,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/colorGery"/>
+            android:background="@color/colorGray"/>
 
         <LinearLayout
             android:id="@+id/layoutToLast"
@@ -100,7 +100,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/colorGery"/>
+            android:background="@color/colorGray"/>
     </LinearLayout>
 
     <ListView

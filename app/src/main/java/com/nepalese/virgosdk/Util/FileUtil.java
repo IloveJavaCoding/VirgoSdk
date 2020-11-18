@@ -1,15 +1,10 @@
 package com.nepalese.virgosdk.Util;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
-import android.text.TextUtils;
 
 import com.nepalese.virgosdk.Manager.RuntimeExec;
-
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -23,14 +18,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
- * some common api for file operation
+ * @author nepalese on 2020/10/18 10:40
+ * @usage 文件，文件夹：增删改查，复制，移动，重命名， 存储路径获取， 文件编码方式判断
  */
 public class FileUtil {
-    //==========================get external file path=============================
+    private static final String TAG = "FileUtil";
+
+    //==================================get external file path======================================
     public static String getRootPath(){
         //storage/emulated/0
         return Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -51,93 +47,247 @@ public class FileUtil {
         return context.getFilesDir().getAbsolutePath();
     }
 
-    //====================create file/dir================================
+
+    //=====================================create file/dir==========================================
     public static boolean createFile(String path, String fileName){
         File file = new File(path+"/"+fileName);
 
         if(!file.exists()){
             try {
-                file.createNewFile();
+                return file.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return true;
-        }else{
-            //
-            return false;
         }
+        return false;
     }
 
     public static boolean createDirs(String folder){
         File file = new File(folder);
 
         if(!file.exists()) {
-            file.mkdirs();
-            return true;
+            return file.mkdirs();
         }
         return false;
     }
 
-    //=========================delete file/dir============================
-    public static void deleteDir(String dir){
+
+    //==========================================delete file/dir=====================================
+    public static boolean deleteDir(String dir){
         File file = new File(dir);
         if(file.exists()){
-            deleteDirWithFile(file);
+            return deleteDirWithFile(file);
         }
+        return false;
     }
 
-    private static void deleteDirWithFile(File file) {
+    private static boolean deleteDirWithFile(File file) {
         if(!file.isDirectory() || !file.exists()) {
-            return;
+            return false;
         }
         if(file.list().length>0){
             for(File f : file.listFiles()){
                 if(f.isFile()){
-                    f.delete();//delete all files
+                   return f.delete();//delete all files
                 }else if(f.isDirectory()){
                     deleteDirWithFile(f);
                 }
             }
         }
 
-        file.delete();
+        return file.delete();
     }
 
     public static boolean deleteFile(String path){
         File file = new File(path);
         if(file.exists()&&file.isFile()){
-            file.delete();
-            return true;
+            return file.delete();
         }
 
         return false;
     }
 
-    public void delete(String path) {
+    //强制性删除
+    public void deleteForce(String path) {
         RuntimeExec.getInstance().executeCommand("rm -rf " + path);
     }
 
-    //=========================copy/move file===========================
-    public static void copyFile(String oldPath, String newPath){
-        byte[] bytes = readBytes(oldPath);
-        getFileFromBytes(bytes, newPath);
+    //=====================================change file/dir name=====================================
+    public static boolean changeFileDirName(String path, String oldName, String newName){
+        File oldFile = new File(path+"/"+oldName);
+        File newFile = new File(path+"/"+newName);
+
+        return oldFile.renameTo(newFile);
     }
 
-    public static int copy(String src, String dest) {
-        int retVal = 0;
+
+    //====================================get file/dir info=========================================
+    public static int getFilesNumber(String dir){
+        File file = new File(dir);
+        return file.listFiles().length;
+    }
+
+    public static String[] getFilesList(String dir){
+        File file = new File(dir);
+        return file.list();
+    }
+
+
+    //====================================read and write content====================================
+    public static void writeToFile(String content, String path, String fileName){
+        File file = new File(path+fileName);
+        if(!file.exists()){
+            createFile(path, fileName);
+        }
+
+        RandomAccessFile randomAccessFile;
+        try {
+            randomAccessFile = new RandomAccessFile(file, "rw");
+            randomAccessFile.seek(0);//rewrite
+            randomAccessFile.write(content.getBytes());
+
+            randomAccessFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //将bytes写入到文件中
+    public static void writeByte2File(byte[] bytes, String outputFilePath) {
+        BufferedOutputStream outputStream = null;
+        try {
+            File file = new File(outputFilePath);
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            outputStream = new BufferedOutputStream(fileOutputStream);
+            outputStream.write(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 读取文件
+     * @param path
+     * @param format 文件编码方式（默认utf-8）
+     * @return 字符串
+     */
+    public static String readFile2String(String path, String format){
+        if(format==null){
+            format = "utf-8";
+        }
+
+        File file = new File(path);
+        if(!file.exists()){
+            return null;
+        }
+
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        InputStreamReader inputStreamReader = null;
+        try {
+            inputStreamReader = new InputStreamReader(inputStream, format);//'utf-8' 'GBK'
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        StringBuilder builder = new StringBuilder();
+        String line;
+        try {
+            while((line=reader.readLine())!=null){
+                builder.append(line);
+                builder.append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
+    }
+
+    //读取资源文件到string
+    public static String readResource2String(Context context, int id, String format){
+        InputStream inputStream = context.getResources().openRawResource(id);
+        InputStreamReader inputStreamReader = null;
+        try {
+            inputStreamReader = new InputStreamReader(inputStream, format);//'utf-8' 'GBK'
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        StringBuilder builder = new StringBuilder();
+        String line;
+        try {
+            while((line=reader.readLine())!=null){
+                builder.append(line);
+                builder.append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
+    }
+
+    //读取文件, 返回为bytes
+    public static byte[] readFile2Bytes(String path){
+        File file = new File(path);
+        if(!file.exists()){
+            return null;
+        }
+
+        FileInputStream inputStream;
+        try {
+            inputStream = new FileInputStream(file);
+            long size = inputStream.getChannel().size();
+            if(size<=0){//空文件
+                return null;
+            }
+
+            byte[] bytes = new byte[inputStream.available()];
+            inputStream.read(bytes);//the total number of bytes read into the buffer,
+
+            return bytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    //============================================copy/move file====================================
+    public static void copyFile(String src, String dest){
+        byte[] bytes = readFile2Bytes(src);
+        writeByte2File(bytes, dest);
+    }
+
+    public static boolean copyFile2(String src, String dest) {
         InputStream from = null;
         OutputStream to = null;
         try {
             from = new FileInputStream(src);
             to = new FileOutputStream(dest);
-            byte buffer[] = new byte[1024 * 8];
+            byte[] buffer = new byte[1024 * 8];
             int length;
             while ((length = from.read(buffer)) != -1) {
                 to.write(buffer, 0, length);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            retVal = -1;
+            return false;
         } finally {
             if (from != null) {
                 try {
@@ -156,267 +306,101 @@ public class FileUtil {
         }
         File file = new File(dest);
         if (file.exists()) {
-            file.setLastModified(System.currentTimeMillis());
+            return file.setLastModified(System.currentTimeMillis());
         }
-        return retVal;
+        return false;
     }
 
-    public static void moveFile(String oldPath, String newPath){
+    public static void copyFile3(String src, String dest){
+        RuntimeExec.getInstance().executeCommand(RuntimeExec.CP + src + " " + dest);
+    }
+
+    //需root权限
+    public static void copyForce(String src, String dest){
+        RuntimeExec.getInstance().executeRootCommand(RuntimeExec.CP + src + " " + dest);
+    }
+
+    public static void moveFile(String src, String dest){
         //先复制文件，然后删除原文件
-        copyFile(oldPath, newPath);
-        deleteFile(oldPath);
+        copyFile(src, dest);
+        deleteFile(src);
     }
 
-    //========================get file/dir info============================
-    public static int getFilesNumber(String dir){
-        File file = new File(dir);
 
-        return file.listFiles().length;
-    }
-
-    public static String[] getFilesList(String dir){
-        File file = new File(dir);
-
-        return file.list();
-    }
-
-    //===========================change file/dir name=======================
-    public static void changeFileDirName(String path, String oldName, String newName){
-        File oldFile = new File(path+"/"+oldName);
-        File newFile = new File(path+"/"+newName);
-
-        oldFile.renameTo(newFile);
-    }
-
-    //========================read and write content===========================
-    public static void writeToFile(String content, String path, String fileName){
-        File file = new File(path+fileName);
-        if(!file.exists()){
-            createFile(path, fileName);
-        }
-
-        RandomAccessFile randomAccessFile;
-        try {
-            randomAccessFile = new RandomAccessFile(file, "rw");
-            randomAccessFile.seek(0);//rewrite
-            randomAccessFile.write(content.getBytes());
-
-            randomAccessFile.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static File getFileFromBytes(byte[] bytes, String outputFile) {
-        BufferedOutputStream stream = null;
-        File file = null;
-        try {
-            file = new File(outputFile);
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            stream = new BufferedOutputStream(fileOutputStream);
-            stream.write(bytes);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+    //==================================文件编码类型：gbk ? utf-8=========================
+    public static Boolean isUtf8(File file) {
+        boolean isUtf8 = true;
+        byte[] buffer = FileUtil.readFile2Bytes(file.getPath());
+        int end = buffer.length;
+        for (int i = 0; i < end; i++) {
+            byte temp = buffer[i];
+            if ((temp & 0x80) == 0) {// 0xxxxxxx
+                continue;
+            } else if ((temp & 0xC0) == 0xC0 && (temp & 0x20) == 0) {// 110xxxxx 10xxxxxx
+                if (i + 1 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0) {
+                    i = i + 1;
+                    continue;
+                }
+            } else if ((temp & 0xE0) == 0xE0 && (temp & 0x10) == 0) {// 1110xxxx 10xxxxxx 10xxxxxx
+                if (i + 2 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0
+                        && (buffer[i + 2] & 0x80) == 0x80 && (buffer[i + 2] & 0x40) == 0) {
+                    i = i + 2;
+                    continue;
+                }
+            } else if ((temp & 0xF0) == 0xF0 && (temp & 0x08) == 0) {// 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+                if (i + 3 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0
+                        && (buffer[i + 2] & 0x80) == 0x80 && (buffer[i + 2] & 0x40) == 0
+                        && (buffer[i + 3] & 0x80) == 0x80 && (buffer[i + 3] & 0x40) == 0) {
+                    i = i + 3;
+                    continue;
                 }
             }
+            isUtf8 = false;
+            break;
         }
-        return file;
+        return isUtf8;
     }
 
-    public static String readContents(String path, String format){
-        if(format==null){
-            format="utf-8";
-        }
-
-        File file = new File(path);
-        if(!file.exists()){
-            //
-            return null;
-        }
-
-        FileInputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        InputStreamReader inputStreamReader = null;
-        try {
-            inputStreamReader = new InputStreamReader(inputStream, format);//'utf-8' 'GBK'
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-        StringBuilder builder = new StringBuilder("");
-        String line;
-        try {
-            while((line=reader.readLine())!=null){
-                builder.append(line);
-                builder.append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return builder.toString();
-    }
-
-    public static String readResource(Context context, int id, String format){
-        InputStream inputStream = context.getResources().openRawResource(id);
-        InputStreamReader inputStreamReader = null;
-        try {
-            inputStreamReader = new InputStreamReader(inputStream, format);//'utf-8' 'GBK'
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-        StringBuilder builder = new StringBuilder("");
-        String line;
-        try {
-            while((line=reader.readLine())!=null){
-                builder.append(line);
-                builder.append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return builder.toString();
-    }
-
-    public static byte[] readBytes(String path){
-        File file = new File(path);
-        if(!file.exists()){
-            return null;
-        }
-
-        FileInputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(file);
-            long size = inputStream.getChannel().size();
-            if(size<=0){
-                return null;
-            }
-
-            byte[] bytes = new byte[inputStream.available()];
-            inputStream.read(bytes);
-
-            return bytes;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    //===========================zip/unzip file/dir==============================
-    public static void unZip(String path, String aimPath, String password) throws ZipException {
-        File file = new File(path);
-        if(!file.exists()){
-            return;
-        }
-
-        unZipFile(file, aimPath, password);
-    }
-
-    public static void unZipFile(File file, String aimPath, String password) throws ZipException {
-        ZipFile zipFile = new ZipFile(file);
-        zipFile.setFileNameCharset("GBK");
-
-        if (!zipFile.isValidZipFile()) {
-            throw new ZipException("压缩文件不合法,可能被损坏.");
-        }
-
-        if(!TextUtils.isEmpty(aimPath)){
-            File destDir = new File(aimPath);
-            if (destDir.isDirectory() && !destDir.exists()) {
-                destDir.mkdir();
-            }
-            if (zipFile.isEncrypted()) {
-                zipFile.setPassword(password.toCharArray());
-            }
-            zipFile.extractAll(aimPath);
-        }else{//unzip to current path
-            File parentDir = file.getParentFile();
-            unZipFile(file, parentDir.getAbsolutePath(), password);
-        }
-    }
-
-    public static boolean zipFile(String path, String aimPath, String password) {
-        File file = new File(path);
-        if (!file.exists()) {
-            return false;
-        }
-
-        aimPath = buildDestinationZipFilePath(file, aimPath);
-        ZipParameters parameters = new ZipParameters();
-        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);            // 压缩方式
-        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);    // 压缩级别
-        if (!TextUtils.isEmpty(password)) {
-            parameters.setEncryptFiles(true);
-            parameters.setEncryptionMethod(Zip4jConstants.ENC_METHOD_STANDARD);    // 加密方式
-            parameters.setPassword(password.toCharArray());
-        }
-        try {
-            ZipFile zipFile = new ZipFile(aimPath);
-            if (file.isDirectory()) {
-                // 如果不创建目录的话,将直接把给定目录下的文件压缩到压缩文件,即没有目录结构
-                File[] subFiles = file.listFiles();
-                ArrayList<File> temp = new ArrayList<File>();
-                Collections.addAll(temp, subFiles);
-                zipFile.addFiles(temp, parameters);
-            } else {
-                zipFile.addFile(file, parameters);
-            }
-        } catch (ZipException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    private static String buildDestinationZipFilePath(File srcFile, String destParam) {
-        if (TextUtils.isEmpty(destParam)) {
-            if (srcFile.isDirectory()) {
-                destParam = srcFile.getParent() + File.separator + srcFile.getName() + ".zip";
-            } else {
-                String fileName = srcFile.getName().substring(0, srcFile.getName().lastIndexOf("."));
-                destParam = srcFile.getParent() + File.separator + fileName + ".zip";
-            }
-        } else {
-            createDestDirectoryIfNecessary(destParam);    // 在指定路径不存在的情况下将其创建出来
-            if (destParam.endsWith(File.separator)) {
-                String fileName = "";
-                if (srcFile.isDirectory()) {
-                    fileName = srcFile.getName();
-                } else {
-                    fileName = srcFile.getName().substring(0, srcFile.getName().lastIndexOf("."));
+    public static Boolean isGbk(File file) {
+        boolean isGbk = true;
+        byte[] buffer = FileUtil.readFile2Bytes(file.getPath());
+        int end = buffer.length;
+        for (int i = 0; i < end; i++) {
+            byte temp = buffer[i];
+            if ((temp & 0x80) == 0) {
+                continue;// B0A1-F7FE//A1A1-A9FE
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if ((Byte.toUnsignedInt(temp) < 0xAA && Byte.toUnsignedInt(temp) > 0xA0)
+                        || (Byte.toUnsignedInt(temp) < 0xF8 && Byte.toUnsignedInt(temp) > 0xAF)) {
+                    if (i + 1 < end) {
+                        if (Byte.toUnsignedInt(buffer[i + 1]) < 0xFF && Byte.toUnsignedInt(buffer[i + 1]) > 0xA0
+                                && Byte.toUnsignedInt(buffer[i + 1]) != 0x7F) {
+                            i = i + 1;
+                            continue;
+                        }
+                    } // 8140-A0FE
+                } else if (Byte.toUnsignedInt(temp) < 0xA1 && Byte.toUnsignedInt(temp) > 0x80) {
+                    if (i + 1 < end) {
+                        if (Byte.toUnsignedInt(buffer[i + 1]) < 0xFF && Byte.toUnsignedInt(buffer[i + 1]) > 0x3F
+                                && Byte.toUnsignedInt(buffer[i + 1]) != 0x7F) {
+                            i = i + 1;
+                            continue;
+                        }
+                    } // AA40-FEA0//A840-A9A0
+                } else if ((Byte.toUnsignedInt(temp) < 0xFF && Byte.toUnsignedInt(temp) > 0xA9)
+                        || (Byte.toUnsignedInt(temp) < 0xAA && Byte.toUnsignedInt(temp) > 0xA7)) {
+                    if (i + 1 < end) {
+                        if (Byte.toUnsignedInt(buffer[i + 1]) < 0xA1 && Byte.toUnsignedInt(buffer[i + 1]) > 0x3F
+                                && Byte.toUnsignedInt(buffer[i + 1]) != 0x7F) {
+                            i = i + 1;
+                            continue;
+                        }
+                    }
                 }
-                destParam += fileName + ".zip";
             }
+            isGbk = false;
+            break;
         }
-        return destParam;
-    }
-
-    private static void createDestDirectoryIfNecessary(String destParam) {
-        File destDir = null;
-        if (destParam.endsWith(File.separator)) {
-            destDir = new File(destParam);
-        } else {
-            destDir = new File(destParam.substring(0, destParam.lastIndexOf(File.separator)));
-        }
-        if (!destDir.exists()) {
-            destDir.mkdirs();
-        }
+        return isGbk;
     }
 }

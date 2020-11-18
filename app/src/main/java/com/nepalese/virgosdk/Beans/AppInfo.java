@@ -11,8 +11,7 @@ public class AppInfo extends BaseBean {
     private String packageName;
     private String versionName;
     private Drawable icon;
-    private int versionCode;
-    private int position;
+    private long versionCode;
 
     public String getName() {
         return name;
@@ -30,11 +29,11 @@ public class AppInfo extends BaseBean {
         this.packageName = packageName;
     }
 
-    public int getVersionCode() {
+    public long getVersionCode() {
         return versionCode;
     }
 
-    public void setVersionCode(int versionCode) {
+    public void setVersionCode(long versionCode) {
         this.versionCode = versionCode;
     }
 
@@ -52,13 +51,5 @@ public class AppInfo extends BaseBean {
 
     public void setIcon(Drawable icon) {
         this.icon = icon;
-    }
-
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
     }
 }

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class MathUtil {
     //get random number
-    public static double getRandomNum(int a, int b) {
+    public static double getRandomNum(double a, double b) {
         return (Math.random() * (b - a)) + a;
     }
 

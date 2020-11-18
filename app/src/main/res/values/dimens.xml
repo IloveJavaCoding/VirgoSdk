@@ -34,6 +34,7 @@
     <!--icon,image-->
     <dimen name="icon_24">24dp</dimen>
     <dimen name="icon_32">32dp</dimen>
+    <dimen name="icon_64">64dp</dimen>
 
     <dimen name="img_100">100dp</dimen>
     <dimen name="img_120">120dp</dimen>

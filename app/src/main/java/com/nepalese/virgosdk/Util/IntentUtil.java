@@ -19,109 +19,21 @@ import java.io.File;
 import java.util.Calendar;
 
 /**
+ * @author nepalese on 2020/10/11 10:33
+ * @usage 跳转选择文件，打开其他APP
  * setAction require add <intent-filter> </intent-filter> into <activity> </activity>
  */
 public class IntentUtil {
-    //======================share to others=======================
-    public static void shareText( Activity activity, String title, String text) {
+    //============================================分享文本===========================================
+    public static void shareText( Activity activity, String title, String content) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_SUBJECT, title);
-        intent.putExtra(Intent.EXTRA_TEXT, text);
+        intent.putExtra(Intent.EXTRA_TEXT, content);
         activity.startActivity(Intent.createChooser(intent, title));
     }
 
-    //===================open file use third app==================
-    //"http://www.google.com"
-    public static void openBrowser(Activity activity, String url){
-        Intent intent  = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        activity.startActivity(intent);
-    }
-
-    public static void searchInfo(Activity activity, String key){
-        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        intent.putExtra(SearchManager.QUERY,key);
-        activity.startActivity(intent);
-    }
-
-    //open record
-    public static void openRecordAudio(Activity activity){
-        Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-        activity.startActivity(intent);
-    }
-
-    //open map
-    /*
-     * @param activity
-     * @param location "38.899533, -77.036476"
-     */
-    public static void openMap(Activity activity, String location){
-        Uri uri = Uri.parse ("geo:" + location);
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        activity.startActivity(intent);
-    }
-
-    //open another app
-    public static void openOtherApp(Activity activity, String packageName, String className, int requestCode){
-        Intent intent = new Intent();
-        ComponentName componentName = new ComponentName(packageName, className);
-        intent.setComponent(componentName);
-        intent.setAction("android.intent.action.MAIN");
-        activity.startActivityForResult(intent, requestCode);
-    }
-
-    //<uses-permission android:name="android.permission.READ_CONTACTS"/>
-    public static void openContract(Activity activity){
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(ContactsContract.Contacts.CONTENT_URI);// ContactsContract.Contacts.CONTENT_URI, Contacts.People.CONTENT_URI
-        activity.startActivity(intent);
-    }
-
-    public static void readContract(Activity activity, int requestCode){
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setData(ContactsContract.Contacts.CONTENT_URI);
-        activity.startActivityForResult(intent, requestCode);
-    }
-
-    //=====================dial, sms, email======================
-    //go to dial app
-    //<intent-filter>
-    //<action android:name="android.intent.action.DIAL"/>
-    //</intent-filter>
-    public static void go2Dial(Activity activity){
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        activity.startActivity(intent);
-    }
-
-    //<uses-permission android:name="android.permission.CALL_PHONE" />
-    public static void dialNumber(Activity activity, String number){
-        Uri uri = Uri.parse("tel:" + number);
-        Intent intent = new Intent(Intent.ACTION_DIAL, uri);
-        activity.startActivity(intent);
-    }
-
-    public static void sendMassage(Activity activity, String number, String msg){
-        Uri uri = Uri.parse("smsto:"+number);
-        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
-        intent.putExtra("sms_body", msg);
-        activity.startActivity(intent);
-    }
-
-    public static void sendEmail(Activity activity, String mail, String msg, String title){
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_EMAIL, mail);
-        intent.putExtra(Intent.EXTRA_TEXT, msg);
-        intent.setType("text/plain");
-        activity.startActivity(Intent.createChooser(intent, title));
-    }
-
-    public static void sendEmail2(Activity activity, String mail){
-        Uri uri = Uri.parse("mailto:" + mail);
-        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
-        activity.startActivity(intent);
-    }
-
-    //===================read file return file path==========================
+    //=========================================选择文件，并返回其位置================================
     /**
      * Uri uri = data.getData();
      * String Path = uri.getPath();
@@ -133,48 +45,199 @@ public class IntentUtil {
         return intent;
     }
 
-    public static void readImageFile(Activity activity, int requestCode){
+    //选取图片文件
+    public static void pickImageFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("image/*"), requestCode);
     }
 
-    public static void readAudioFile(Activity activity, int requestCode){
+    //选取音频文件
+    public static void pickAudioFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("audio/*"),requestCode);
     }
 
-    public static void readVideoFile(Activity activity, int requestCode){
+    //选取视频文件
+    public static void pickVideoFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("video/*"),requestCode);
     }
 
-    public static void readTextFile(Activity activity, int requestCode){
+    //选取文本文件
+    public static void pickTextFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("text/plain"),requestCode);
     }
 
-    public static void readFile(Activity activity, int requestCode){
+    //选取任意文件
+    public static void pickFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("*/*"),requestCode);
     }
 
-    //open camera for take photo
-    //Bundle bundle = data.getExtras();
-    //bitmap = (Bitmap)bundle.get("data");
+    //========================================第三方app，无返回值====================================
+    /**
+     * 打开浏览器
+     * @param activity
+     * @param url : "http://www.google.com"
+     */
+    public static void openBrowser(Activity activity, String url){
+        Intent intent  = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 打开浏览器，并直接搜索输入的关键字
+     * @param activity
+     * @param key
+     */
+    public static void searchInfo(Activity activity, String key){
+        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+        intent.putExtra(SearchManager.QUERY, key);
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 打开录音机
+     * @param activity
+     */
+    public static void openRecordAudio(Activity activity){
+        Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+        activity.startActivity(intent);
+    }
+
+    /** 打开地图
+     * @param activity
+     * @param location： "38.899533, -77.036476"
+     */
+    public static void openMap(Activity activity, String location){
+        Uri uri = Uri.parse ("geo:" + location);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        activity.startActivity(intent);
+    }
+
+    /** 打开联系人
+     * @param activity
+     * 需权限： <uses-permission android:name="android.permission.READ_CONTACTS"/>
+     */
+    public static void openContract(Activity activity){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(ContactsContract.Contacts.CONTENT_URI);//Contacts.People.CONTENT_URI
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 进入拨号界面
+     * @param activity
+     * <intent-filter>
+     *     <action android:name="android.intent.action.DIAL"/>
+     *  </intent-filter>
+     */
+    public static void openDial(Activity activity){
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 打电话
+     * @param activity
+     * @param number：电话号码
+     * 需权限：<uses-permission android:name="android.permission.CALL_PHONE" />
+     */
+    public static void dialNumber(Activity activity, String number){
+        Uri uri = Uri.parse("tel:" + number);
+        Intent intent = new Intent(Intent.ACTION_DIAL, uri);
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 发送信息
+     * @param activity
+     * @param number 手机号码
+     * @param msg 内容
+     */
+    public static void sendMassage(Activity activity, String number, String msg){
+        Uri uri = Uri.parse("smsto:"+number);
+        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+        intent.putExtra("sms_body", msg);
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 打开邮箱
+     * @param activity
+     * @param mail
+     */
+    public static void openEmail(Activity activity, String mail){
+        Uri uri = Uri.parse("mailto:" + mail);
+        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 发送电子邮件（文本）
+     * @param activity
+     * @param mail 目标邮箱
+     * @param msg  内容
+     * @param title 标题
+     */
+    public static void sendEmail(Activity activity, String mail, String msg, String title){
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_EMAIL, mail);
+        intent.putExtra(Intent.EXTRA_TEXT, msg);
+        intent.setType("text/plain");
+        activity.startActivity(Intent.createChooser(intent, title));
+    }
+
+    //==================================打开文件、第三方APP，有返回值=================================
+    //打开其他APP
+    public static void openThirdApp(Activity activity, String packageName, String className, int requestCode){
+        Intent intent = new Intent();
+        ComponentName componentName = new ComponentName(packageName, className);
+        intent.setComponent(componentName);
+        intent.setAction("android.intent.action.MAIN");
+        activity.startActivityForResult(intent, requestCode);
+    }
+
+    /**
+     * 进入联系人，并返回选择的联系人
+     * @param activity
+     * @param requestCode
+     */
+    public static void pickContract(Activity activity, int requestCode){
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setData(ContactsContract.Contacts.CONTENT_URI);
+        activity.startActivityForResult(intent, requestCode);
+    }
+
+    //=======================================拍照，视频==============================================
+    /**
+     * 打开相机，拍照
+     * @param activity
+     * @param requestCode
+     * 返回：Bundle bundle = data.getExtras();
+     *      bitmap = (Bitmap)bundle.get("data");
+     */
     public static void openCamera4Image(Activity activity, int requestCode){
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);//"android.media.action.IMAGE_CAPTURE"
         activity.startActivityForResult(intent,requestCode);
     }
 
+    /**
+     * 打开相机，拍照, 并保存到本地
+     * @param activity
+     * @param path
+     * @param requestCode
+     */
     public static void openCamera4ImageAndSave(Activity activity, String path, int requestCode){
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);//"android.media.action.IMAGE_CAPTURE"
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         long time = Calendar.getInstance().getTimeInMillis();
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(path, time + ".jpg")));
         activity.startActivityForResult(intent,requestCode);
     }
 
-    //open camera for record video
-    /**
+    /** 打开相机，录视频
      * @param activity
      * @param requestCode
      * @param quality 0 means low quality, 1 means high quality
      * @param sizeLimit  the maximum allowed size.
      * @param durationLimit the maximum allowed recording duration in seconds.
+     * @param path 存储路径
      */
     public static void openCamera4Video(Activity activity, int requestCode, int quality, int sizeLimit, int durationLimit, String path){
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
@@ -187,11 +250,8 @@ public class IntentUtil {
         activity.startActivityForResult(intent, requestCode);
     }
 
-    //====================open file with other app in the device====================
-    /**
-     * @param activity
-     * @param filePath "file:///sdcard/song.mp3"
-     */
+    //===============================从设备上选择APP打开目标文件======================================
+    //filePath /sdcard/song.mp3"
     public static void openAudioFile(Activity activity, String filePath){
         Uri uri = Uri.parse("file://" + filePath);
         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -222,10 +282,10 @@ public class IntentUtil {
         activity.startActivity(intent);
     }
 
-    //=====================get the real path of chosen file===========================
+
+    //================从intent返回的文件路径（provider）获取其在设备上的真正存储路径====================
     public static String getRealPath4Uri(Context context, Uri uri, ContentResolver contentResolver){
         String path;
-
         if ("file".equalsIgnoreCase(uri.getScheme())){//使用第三方应用打开
             path = uri.getPath();
         }else{//content.provider
@@ -334,5 +394,4 @@ public class IntentUtil {
     private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
-
 }

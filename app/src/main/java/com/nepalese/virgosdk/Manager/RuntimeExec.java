@@ -39,14 +39,11 @@ public class RuntimeExec {
             return "";
         } else {
             Scanner scanner = new Scanner(inputStream);
-
             while(scanner.hasNext()) {
                 builder.append(scanner.nextLine());
                 builder.append("\n");
             }
-
             scanner.close();
-
             try {
                 inputStream.close();
             } catch (IOException var6) {
@@ -71,7 +68,6 @@ public class RuntimeExec {
             os.writeBytes("exit\n");
             os.flush();
             process.waitFor();
-            return;
         } catch (Exception var14) {
             var14.printStackTrace();
         } finally {
@@ -80,7 +76,7 @@ public class RuntimeExec {
                     os.close();
                 }
                 process.destroy();
-            } catch (Exception var13) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -96,7 +92,6 @@ public class RuntimeExec {
             os.writeBytes("screencap -p " + file);
             os.flush();
             process.waitFor();
-            return;
         } catch (Exception var14) {
             var14.printStackTrace();
         } finally {
@@ -105,7 +100,7 @@ public class RuntimeExec {
                     os.close();
                 }
                 process.destroy();
-            } catch (Exception var13) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -121,7 +116,7 @@ public class RuntimeExec {
         }
     }
 
-    class StreamGobbler extends Thread {
+    static class StreamGobbler extends Thread {
         InputStream mInputStream;
 
         public StreamGobbler(InputStream is) {
@@ -133,9 +128,7 @@ public class RuntimeExec {
                 InputStreamReader isr = new InputStreamReader(this.mInputStream);
                 BufferedReader br = new BufferedReader(isr);
                 while(true) {
-                    if (br.readLine() != null) {
-                        continue;
-                    }
+                    br.readLine();
                 }
             } catch (IOException var3) {
                 var3.printStackTrace();

@@ -1,32 +1,31 @@
 package com.nepalese.virgosdk.Util;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Build;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 import androidx.annotation.RequiresApi;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.io.File;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author nepalese on 2020/11/05 11:23
+ * @usage 数据转换：类型，单位
+ */
+
 public class ConvertUtil {
-    //string 2 number
+    //======================================字符串转数值=============================================
     public static float toFloat(String src) {
         float retVal = 0.0F;
 
         try {
             retVal = Float.parseFloat(src);
-        } catch (Exception var3) {
+        } catch (Exception ignored) {
         }
 
         return retVal;
@@ -37,7 +36,7 @@ public class ConvertUtil {
 
         try {
             retVal = Double.parseDouble(src);
-        } catch (Exception var4) {
+        } catch (Exception ignored) {
         }
 
         return retVal;
@@ -48,7 +47,7 @@ public class ConvertUtil {
 
         try {
             retVal = Integer.parseInt(src);
-        } catch (Exception var3) {
+        } catch (Exception ignored) {
         }
 
         return retVal;
@@ -77,6 +76,8 @@ public class ConvertUtil {
         return retVal;
     }
 
+
+    //=======================================字符串<-->十六进制======================================
     //字符串转换为16进制字符串
     public static String string2Hex(String str){
         String out = "";
@@ -110,7 +111,7 @@ public class ConvertUtil {
 
         try
         {
-            str = new String(baKeyword, "utf-8");//UTF-16le:Not
+            str = new String(baKeyword, StandardCharsets.UTF_8);//UTF-16le:Not
         } catch (Exception e1)
         {
             e1.printStackTrace();
@@ -118,102 +119,8 @@ public class ConvertUtil {
         return str;
     }
 
-    //dp to px
-    public static int dip2px(Context context, float dipValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dipValue * scale + 0.5f);
-    }
 
-    //sp to px
-    public static int sp2px(Context context, float spValue) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, spValue, context.getResources().getDisplayMetrics());
-    }
-
-    public static int px2dip(Context context, float pxValue) {
-        return (int) (pxValue / context.getResources().getDisplayMetrics().density + 0.5f);
-    }
-
-    //根据屏幕密度, 将dp(device independent pixels 无关像素点) 转 px( 像素)
-    public static int dp2px(Context context, float dp) {
-        if (context != null) {
-            Resources mResources = context.getResources();
-            if (mResources != null) {
-                DisplayMetrics metrics = mResources.getDisplayMetrics();
-                if (metrics != null) {
-                    return (int) (dp * (metrics.densityDpi / 160f));
-                }
-            }
-        }
-        return 0;
-    }
-
-    // 根据屏幕密度, 将 px( 像素) 转 dp(device independent pixels 无关像素点)
-    public static int px2dp(Context context, float px) {
-        if (context != null) {
-            Resources mResources = context.getResources();
-            if (mResources != null) {
-                DisplayMetrics metrics = mResources.getDisplayMetrics();
-                if (metrics != null) {
-                    return (int) (px / (metrics.densityDpi / 160f));
-                }
-            }
-        }
-        return 0;
-    }
-
-    public static int dp2px(Context context, int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
-    }
-
-    public static float px2sp1(Context context, int size) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, size, context.getResources().getDisplayMetrics());
-    }
-
-    public static float sp2px1(Context context, int size) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, context.getResources().getDisplayMetrics());
-    }
-
-    // 根据手机的分辨率从 sp 的单位 转成为 px(像素)
-    public static int sp2pix(Context context, float sp) {
-        if (context != null ) {
-            Resources mResources = context.getResources();
-            if (mResources != null) {
-                DisplayMetrics mMetrics = mResources.getDisplayMetrics();
-                if (mMetrics != null) {
-                    final float scale = mMetrics.scaledDensity;
-                    return (int) (sp  * sp + 0.5f);
-                }
-            }
-        }
-        return 0;
-    }
-
-    //根据手机的分辨率从 px(像素) 的单位 转成为 sp
-    public static int px2sp(Context context, float px) {
-        if (context != null ) {
-            Resources mResources = context.getResources();
-            if (mResources != null) {
-                DisplayMetrics mMetrics = mResources.getDisplayMetrics();
-                if (mMetrics != null) {
-                    final float scale = mMetrics.scaledDensity;
-                    return (int) (px / scale + 0.5f);
-                }
-            }
-        }
-        return 0;
-    }
-
-    //温度： 华氏 ~ 摄氏度 Fahrenheit, Centigrade
-    //C=（5/9）（F-32）
-    public static float fahrenheit2Centigrade(float f){
-        return (5/9) * (f-32f);
-    }
-
-    public static float centigrade2Fahrenheit(float c){
-        return c*1.8f + 32;
-    }
-
-    //进制转换
+    //=========================================进制转换==============================================
     //16 <--> 10
     public static int hex2Decimal(String hex){
         int d = 0;
@@ -298,152 +205,174 @@ public class ConvertUtil {
         }
     }
 
-    //=======================array & list==================================
+
+    //============================================array & list======================================
     // int[] 转 List<Integer>
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public static List<Object> int2List(int[] data) {
-        List<Object> list = Arrays.stream(data).boxed().collect(Collectors.toList());
+    @RequiresApi(api = Build.VERSION_CODES.N) //24
+    public static List<Object> intArr2List(int[] data) {
+        return Arrays.stream(data).boxed().collect(Collectors.toList());
+    }
+
+    public static List<Integer> intArr2List2(int[] data){
+        List<Integer> list = new ArrayList<>();
+        for(int a : data){
+            list.add(a);
+        }
         return list;
     }
 
     // String[] 转 List<String>
-    public static List<String> string2List(String[] strs){
-        return Arrays.asList(strs);
+    public static List<String> strings2List(String[] data){
+        return Arrays.asList(data);
     }
 
-    //==================================gbk ? utf-8=========================
-    public static Boolean isUtf8(File file) {
-        boolean isUtf8 = true;
-        byte[] buffer = FileUtil.readBytes(file.getPath());
-        int end = buffer.length;
-        for (int i = 0; i < end; i++) {
-            byte temp = buffer[i];
-            if ((temp & 0x80) == 0) {// 0xxxxxxx
-                continue;
-            } else if ((temp & 0xC0) == 0xC0 && (temp & 0x20) == 0) {// 110xxxxx 10xxxxxx
-                if (i + 1 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0) {
-                    i = i + 1;
-                    continue;
-                }
-            } else if ((temp & 0xE0) == 0xE0 && (temp & 0x10) == 0) {// 1110xxxx 10xxxxxx 10xxxxxx
-                if (i + 2 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0
-                        && (buffer[i + 2] & 0x80) == 0x80 && (buffer[i + 2] & 0x40) == 0) {
-                    i = i + 2;
-                    continue;
-                }
-            } else if ((temp & 0xF0) == 0xF0 && (temp & 0x08) == 0) {// 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-                if (i + 3 < end && (buffer[i + 1] & 0x80) == 0x80 && (buffer[i + 1] & 0x40) == 0
-                        && (buffer[i + 2] & 0x80) == 0x80 && (buffer[i + 2] & 0x40) == 0
-                        && (buffer[i + 3] & 0x80) == 0x80 && (buffer[i + 3] & 0x40) == 0) {
-                    i = i + 3;
-                    continue;
-                }
-            }
-            isUtf8 = false;
-            break;
-        }
-        return isUtf8;
-    }
-
-    /**
-     * 如果文件是gbk编码或者gb2312返回true,反之false
-     * @param file
-     * @return
-     */
-    public static Boolean isGbk(File file) {
-        boolean isGbk = true;
-        byte[] buffer = FileUtil.readBytes(file.getPath());
-        int end = buffer.length;
-        for (int i = 0; i < end; i++) {
-            byte temp = buffer[i];
-            if ((temp & 0x80) == 0) {
-                continue;// B0A1-F7FE//A1A1-A9FE
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if ((Byte.toUnsignedInt(temp) < 0xAA && Byte.toUnsignedInt(temp) > 0xA0)
-                        || (Byte.toUnsignedInt(temp) < 0xF8 && Byte.toUnsignedInt(temp) > 0xAF)) {
-                    if (i + 1 < end) {
-                        if (Byte.toUnsignedInt(buffer[i + 1]) < 0xFF && Byte.toUnsignedInt(buffer[i + 1]) > 0xA0
-                                && Byte.toUnsignedInt(buffer[i + 1]) != 0x7F) {
-                            i = i + 1;
-                            continue;
-                        }
-                    } // 8140-A0FE
-                } else if (Byte.toUnsignedInt(temp) < 0xA1 && Byte.toUnsignedInt(temp) > 0x80) {
-                    if (i + 1 < end) {
-                        if (Byte.toUnsignedInt(buffer[i + 1]) < 0xFF && Byte.toUnsignedInt(buffer[i + 1]) > 0x3F
-                                && Byte.toUnsignedInt(buffer[i + 1]) != 0x7F) {
-                            i = i + 1;
-                            continue;
-                        }
-                    } // AA40-FEA0//A840-A9A0
-                } else if ((Byte.toUnsignedInt(temp) < 0xFF && Byte.toUnsignedInt(temp) > 0xA9)
-                        || (Byte.toUnsignedInt(temp) < 0xAA && Byte.toUnsignedInt(temp) > 0xA7)) {
-                    if (i + 1 < end) {
-                        if (Byte.toUnsignedInt(buffer[i + 1]) < 0xA1 && Byte.toUnsignedInt(buffer[i + 1]) > 0x3F
-                                && Byte.toUnsignedInt(buffer[i + 1]) != 0x7F) {
-                            i = i + 1;
-                            continue;
-                        }
-                    }
-                }
-            }
-            isGbk = false;
-            break;
-        }
-        return isGbk;
-    }
-
-    //========================================================================
-    public static String getFormatSize(float size) {
-        double kiloByte = size / 1024;
+    //============================================文件单位转换=======================================
+    public static String formatFileSize(long size) {
+        long kiloByte = size / 1024;
         if (kiloByte < 1) {
-            return "0Byte";
+            return "0 B";
         }
 
-        double megaByte = kiloByte / 1024;
+        long megaByte = kiloByte / 1024;
         if (megaByte < 1) {
             BigDecimal result1 = new BigDecimal(Double.toString(kiloByte));
             return result1.setScale(2, BigDecimal.ROUND_HALF_UP)
-                    .toPlainString() + "KB";
+                    .toPlainString() + " KB";
         }
 
-        double gigaByte = megaByte / 1024;
+        long gigaByte = megaByte / 1024;
         if (gigaByte < 1) {
             BigDecimal result2 = new BigDecimal(Double.toString(megaByte));
             return result2.setScale(2, BigDecimal.ROUND_HALF_UP)
-                    .toPlainString() + "MB";
+                    .toPlainString() + " MB";
         }
 
-        double teraBytes = gigaByte / 1024;
+        long teraBytes = gigaByte / 1024;
         if (teraBytes < 1) {
             BigDecimal result3 = new BigDecimal(Double.toString(gigaByte));
             return result3.setScale(2, BigDecimal.ROUND_HALF_UP)
-                    .toPlainString() + "GB";
+                    .toPlainString() + " GB";
         }
+
         BigDecimal result4 = new BigDecimal(teraBytes);
-        return result4.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString()
-                + "TB";
+        return result4.setScale(2, BigDecimal.ROUND_HALF_UP).
+                toPlainString() + " TB";
     }
 
-    //=============================2/4 json====================================
-    //需添加gson.jar
-    public static Object getObject(String json, Type class1) {
-        try {
-            Gson gson = (new GsonBuilder()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-            Object object = gson.fromJson(json.trim(), class1);
-            return object;
-        } catch (Exception var4) {
-            var4.printStackTrace();
-            return null;
+
+    //============================================时间单位转换=======================================
+    //get the hh:mm:ss from millSecs
+    public static String formatTime(long millSec){
+        int seconds =(int) millSec/1000;
+        int hour, sec, min;
+        String hours, secs, mins;
+
+        if(seconds>60*60){//1 hour
+            hour = seconds/3600;
+            min = (seconds - hour*3600)/60;
+            sec = seconds - hour*3600 - min*60;
+
+            if(hour<10){
+                hours = "0" + hour;
+            }else{
+                hours = Integer.toString(hour);
+            }
+            if(min<10){
+                mins = "0" + min;
+            }else{
+                mins = Integer.toString(min);
+            }
+            if(sec<10){
+                secs = "0" + sec;
+            }else{
+                secs = Integer.toString(sec);
+            }
+
+            return hours+":"+mins+":"+secs;
+        }
+        else{
+            min = seconds/60;
+            sec = seconds - min*60;
+            if(min<10){
+                mins = "0" + min;
+            }else{
+                mins = Integer.toString(min);
+            }
+            if(sec<10){
+                secs = "0" + sec;
+            }else{
+                secs = Integer.toString(sec);
+            }
+
+            return mins+":"+secs;
         }
     }
 
-    public static String toJson(Object object) {
-        try {
-            Gson gson = (new GsonBuilder()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-            return gson.toJson(object);
-        } catch (Exception var2) {
-            return "";
-        }
+
+    //====================================== 显示单位转换============================================
+    //dp = px / density; --> px = dp * density = dp * (dpi / 160)
+    //density = dpi / 160 ;
+    //dpi = px / inch;(dot per inch)
+
+    //px = dp * density
+    //dp to px
+    public static float dp2px(Context context, float dp) {
+        final float density = context.getResources().getDisplayMetrics().density;
+        return dp * density;
     }
+
+    //px = dp * (dpi / 160)
+    public static float dp2px2(Context context, float dp) {
+        int dpi = context.getResources().getDisplayMetrics().densityDpi;
+        return dp * (dpi / 160f);
+    }
+
+    public static float dp2px3(Context context, float dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    }
+
+    //dp = px / density;
+    //px to dp
+    public static float px2dp(Context context, float px) {
+        final float density = context.getResources().getDisplayMetrics().density;
+        return px / density;
+    }
+
+    public static float px2dp2(Context context, float px) {
+        int dpi = context.getResources().getDisplayMetrics().densityDpi;
+        return px / (dpi / 160f);
+    }
+
+    //px = sp * scaledDensity;
+    //sp to px
+    public static float sp2px(Context context, float sp) {
+        float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
+        return sp  * scaledDensity;
+    }
+
+    public static float sp2px2(Context context, float sp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
+    }
+
+    //sp = px / scaledDensity;
+    //px to sp
+    public static float px2sp(Context context, float px) {
+        float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
+        return px / scaledDensity;
+    }
+
+    public static float px2sp2(Context context, float px) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, context.getResources().getDisplayMetrics());
+    }
+
+    //=======================温度： 华氏 ~ 摄氏度 Fahrenheit, Centigrade=============================
+    //C=（5/9）（F-32）
+    public static float fahrenheit2Centigrade(float f){
+        return (5/9) * (f-32f);
+    }
+
+    public static float centigrade2Fahrenheit(float c){
+        return c*1.8f + 32;
+    }
+
 }

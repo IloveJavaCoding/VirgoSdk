@@ -25,24 +25,44 @@ import java.lang.reflect.Method;
 public class ScreenUtil {
     private static final String TAG = "ScreenUtil";
 
-    //==============================screen cap===================================
+    public static final int ORIENTATION_LANDSCAPE = 0;
+    public static final int ORIENTATION_PORTRAIT = 1;
+
+    //==============================================设置系统横竖屏===================================
+    public static void setOrientation(int orientation){
+        switch (orientation){
+            case ORIENTATION_LANDSCAPE:
+                RuntimeExec.getInstance().executeCommand("setprop persist.sys.screenorientation landscape");
+                RuntimeExec.getInstance().executeCommand("reboot");
+                break;
+            case ORIENTATION_PORTRAIT:
+                RuntimeExec.getInstance().executeCommand("setprop persist.sys.screenorientation portrait");
+                RuntimeExec.getInstance().executeCommand("reboot");
+                break;
+        }
+    }
+
+    //=========================================截屏==================================================
     public static void screenCap(Activity activity, String fileName){
         View dView = activity.getWindow().getDecorView();
         dView.setDrawingCacheEnabled(true);
         dView.buildDrawingCache();
         Bitmap bmp = dView.getDrawingCache();
+
         if (bmp != null)
         {
-            String sdCardPath = FileUtil.getAppRootPth(activity);
-            BitmapUtil.bitmap2Local(bmp, sdCardPath, fileName);
+            String path = FileUtil.getAppRootPth(activity);
+            BitmapUtil.saveBitmap2File(bmp, path, fileName);
         }
     }
 
-    public static void screenShot(Activity activity, String fileName){
-        String path = FileUtil.getAppRootPth(activity) + File.separator + fileName;
+    //默认存放在APP安装文件根目录下
+    public static void screenShot(Context context, String fileName){
+        String path = FileUtil.getAppRootPth(context) + File.separator + fileName;
         RuntimeExec.takeScreenShot(path);
     }
 
+    //==============================================================================================
     /**
      * 获取屏幕显示指标对象
      * @return DisplayMetrics //dm.widthPixels;  //dm.heightPixels;
@@ -63,7 +83,7 @@ public class ScreenUtil {
         return getScreenDM(context).heightPixels;
     }
 
-    //=========================keyboard control===============================
+    //===========================================键盘===============================================
     //启调键盘   (两种启调方式, 在不同机型存在启调差异)
     public static void showKeyBoard(EditText et){
         et.setFocusable(true);
@@ -132,7 +152,7 @@ public class ScreenUtil {
         }
     }
 
-    //==========================================控制屏幕亮度=========================================
+    //==========================================屏幕亮度============================================
     //设置当前屏幕亮度值 0--255，并使之生效
     public static void setScreenBrightness(Activity act, float value) {
         value = value>255.0f? 255.0f: value< 0.0f? 0.0f: value;
