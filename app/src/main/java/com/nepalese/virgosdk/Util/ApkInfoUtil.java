@@ -5,6 +5,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import com.nepalese.virgosdk.Beans.AppInfo;
 
@@ -42,6 +45,7 @@ public class ApkInfoUtil {
         return  getPackageInfo(getSelfPackageName(context)).versionName;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.P)
     public long  getSelfVersionCode(Context context){
         return getPackageInfo(getSelfPackageName(context)).getLongVersionCode();
     }
@@ -93,7 +97,7 @@ public class ApkInfoUtil {
             app.setName(getAppName(appInfo));
             app.setPackageName(appInfo.packageName);
             app.setVersionName(pkgInfo.versionName);
-            app.setVersionCode(pkgInfo.getLongVersionCode());
+            app.setVersionCode(pkgInfo.versionCode);
             app.setIcon(getAppIcon(appInfo));
             return app;
         }

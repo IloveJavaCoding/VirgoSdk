@@ -1,6 +1,7 @@
 package com.nepalese.virgosdk.VirgoView.Adapter;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,8 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
 
 import com.nepalese.virgosdk.Beans.CheckBean;
 import com.nepalese.virgosdk.R;
@@ -57,6 +60,7 @@ public class ListView_FileSelector_Adapter extends BaseAdapter {
         public CheckBox checkBox;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;

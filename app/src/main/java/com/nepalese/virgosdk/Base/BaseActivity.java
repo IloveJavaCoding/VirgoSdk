@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.KeyEvent;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -36,6 +37,14 @@ public class BaseActivity extends AppCompatActivity {
 
     protected void postEvent(Object event) {
         EventBus.getDefault().post(event);
+    }
+
+    public void showToast(String msg){
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    public void showLongToast(String msg){
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
     protected void setNeedPermissions() {

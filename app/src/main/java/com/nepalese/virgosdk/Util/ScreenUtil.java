@@ -3,6 +3,7 @@ package com.nepalese.virgosdk.Util;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -12,6 +13,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+
+import androidx.annotation.RequiresApi;
 
 import com.nepalese.virgosdk.Manager.RuntimeExec;
 
@@ -68,6 +71,7 @@ public class ScreenUtil {
      * @return DisplayMetrics //dm.widthPixels;  //dm.heightPixels;
      * WindowManager)context.getSystemService(Context.WINDOW_SERVICE).getDefaultDisplay().getMetrics(dm); Deprecated
      */
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public static DisplayMetrics getScreenDM(Context context) {
         DisplayMetrics dm = new DisplayMetrics();
         context.getDisplay().getRealMetrics(dm);
@@ -75,12 +79,20 @@ public class ScreenUtil {
         return dm;
     }
 
+    public static DisplayMetrics getScreenDMOld(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics dm = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(dm);
+
+        return dm;
+    }
+
     public static int getScreenWidth(Context context){
-        return getScreenDM(context).widthPixels;
+        return getScreenDMOld(context).widthPixels;
     }
 
     public static int getScreenHeight(Context context){
-        return getScreenDM(context).heightPixels;
+        return getScreenDMOld(context).heightPixels;
     }
 
     //===========================================键盘===============================================

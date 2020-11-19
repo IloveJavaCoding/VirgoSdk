@@ -6,7 +6,6 @@ import android.util.Log;
 
 import java.io.File;
 
-import top.zibin.luban.CompressionPredicate;
 import top.zibin.luban.Luban;
 import top.zibin.luban.OnCompressListener;
 

@@ -2,9 +2,12 @@ package com.nepalese.virgosdk.Util;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 import android.webkit.CookieManager;
+
+import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,8 +26,24 @@ public class StorageUtil {
 
     //====================================get system memory info====================================
     //外部存储情况
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public static long getExternalStorageSpace(String type){
-        File file = Environment.getStorageDirectory(); //getExternalStorageDirectory();
+        File file = Environment.getStorageDirectory();
+        if (file.exists()){
+            switch (type){
+                case TYPE_TOTAL:
+                    return file.getTotalSpace();
+                case TYPE_FREE:
+                    return file.getFreeSpace();
+                case TYPE_USED:
+                    return file.getTotalSpace()-file.getFreeSpace();
+            }
+        }
+        return -1;
+    }
+
+    public static long getExternalStorageSpaceOld(String type){
+        File file = Environment.getExternalStorageDirectory();
         if (file.exists()){
             switch (type){
                 case TYPE_TOTAL:

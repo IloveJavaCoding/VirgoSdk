@@ -15,6 +15,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Size;
 
+import androidx.annotation.RequiresApi;
+
 import com.nepalese.virgosdk.Beans.AudioFile;
 import com.nepalese.virgosdk.Beans.ImageFile;
 import com.nepalese.virgosdk.Beans.VideoFile;
@@ -420,6 +422,7 @@ public class MediaUtil {
         return bitmap;
     }
 
+    @RequiresApi(29)
     public static Bitmap getVideoThumb(File file, int width, int height) {
         Bitmap bitmap = null;
         try {
@@ -430,6 +433,7 @@ public class MediaUtil {
         return bitmap;
     }
 
+    @RequiresApi(29)
     public static Bitmap getImageThumb(File file, int width, int height) {
         Bitmap bitmap = null;
         try {
@@ -440,6 +444,7 @@ public class MediaUtil {
         return bitmap;
     }
 
+    @RequiresApi(29)
     public static Bitmap getAudioThumb(File file, int width, int height) {
         Bitmap bitmap = null;
         try {
