@@ -1,6 +1,5 @@
 package com.nepalese.virgosdk.Util;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -12,8 +11,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.RequiresPermission;
 
-import com.nepalese.virgosdk.Beans.FlowInfo;
-import com.nepalese.virgosdk.Beans.NetworkType;
+import com.nepalese.virgosdk.Beans.BaseBean;
 
 import java.util.List;
 
@@ -22,12 +20,9 @@ import java.util.List;
  * @usage  获取网络连接类型，流量使用情况
  */
 public class NetworkUtil {
-    //没有网络连接
-    public static final int NETWORK_NONE = 0;
-    //有线连接
-    public static final int NETWORK_INTERNET = 1;
-    //wifi连接
-    public static final int NETWORK_WIFI = 2;
+    public static final int NETWORK_NONE = 0;      //没有网络连接
+    public static final int NETWORK_INTERNET = 1;  //有线连接
+    public static final int NETWORK_WIFI = 2;      //wifi连接
     //手机网络数据连接类型
     public static final int NETWORK_2G = 3;
     public static final int NETWORK_3G = 4;
@@ -122,7 +117,7 @@ public class NetworkUtil {
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info != null && info.isAvailable()) {
             if (info.getType() == ConnectivityManager.TYPE_ETHERNET) {
-                //
+                netType = NetworkType.NETWORK_INTERNET;
             } else if (info.getType() == ConnectivityManager.TYPE_WIFI) {
                 netType = NetworkType.NETWORK_WIFI;
             } else if (info.getType() == ConnectivityManager.TYPE_MOBILE) {
@@ -192,11 +187,11 @@ public class NetworkUtil {
     }
 
     /**
-     * 获取系统所用流量数
+     * 获取系统所用流量数: 上传 + 下载
      * @return
      */
-    private long getTotalRxBytes() {
-        return TrafficStats.getTotalRxBytes();
+    private long getTotalBytes() {
+        return TrafficStats.getTotalTxBytes() + TrafficStats.getTotalRxBytes();
     }
 
     /**
@@ -227,10 +222,8 @@ public class NetworkUtil {
             String packName = packinfo.packageName;
             if (!TextUtils.isEmpty(packName)) {
                 if (packName.equals(packageName)) {
-                    //用于封装具有Internet权限的应用程序信息
-                    //封装应用信息
                     flowInfo.setPackageName(packName);
-                    flowInfo.setAppNAme(packinfo.applicationInfo.loadLabel(pms).toString());
+                    flowInfo.setAppName(packinfo.applicationInfo.loadLabel(pms).toString());
                     //获取到应用的uid（user id）
                     int uid = packinfo.applicationInfo.uid;
                     //TrafficStats对象通过应用的uid来获取应用的下载、上传流量信息
@@ -243,5 +236,75 @@ public class NetworkUtil {
             }
         }
         return flowInfo;
+    }
+
+    //================================self class=======================================
+    public enum NetworkType {
+        NETWORK_INTERNET("Internet"),
+        NETWORK_WIFI("WiFi"),
+        NETWORK_2G("2G"),
+        NETWORK_4G("4G"),
+        NETWORK_3G("3G"),
+        NETWORK_UNKNOWN("Unknown"),
+        NETWORK_NO("No network");
+
+        private String desc;
+        NetworkType(String desc) {
+            this.desc = desc;
+        }
+
+        @Override
+        public String toString() {
+            return desc;
+        }
+    }
+
+    public static class FlowInfo extends BaseBean {
+        private String packageName;
+        private String appName;
+        private long upKb;
+        private long downKb;
+
+        public FlowInfo() {
+        }
+
+        public FlowInfo(String packageName, String appName, long upKb, long downKb) {
+            this.packageName = packageName;
+            this.appName = appName;
+            this.upKb = upKb;
+            this.downKb = downKb;
+        }
+
+        public String getPackageName() {
+            return packageName;
+        }
+
+        public void setPackageName(String packageName) {
+            this.packageName = packageName;
+        }
+
+        public String getAppName() {
+            return appName;
+        }
+
+        public void setAppName(String appName) {
+            this.appName = appName;
+        }
+
+        public void setUpKb(long upKb) {
+            this.upKb = upKb;
+        }
+
+        public void setDownKb(long downKb) {
+            this.downKb = downKb;
+        }
+
+        public long getUpKb() {
+            return upKb;
+        }
+
+        public long getDownKb() {
+            return downKb;
+        }
     }
 }

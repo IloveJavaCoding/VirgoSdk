@@ -21,9 +21,9 @@ import java.util.List;
 /**
  * 副屏播放器
  * 1. 无法使用surfaceView
- * 2. 无法播放分辨率过高视频：已知4k无法播放
+ * 2. 无法播放分辨率高于系统支持最高分辨率的视频
  */
-public class SecondVideoViewTexture extends TextureView {
+public class SecondVideoViewTexture extends TextureView implements TextureView.SurfaceTextureListener {
     private static final String TAG = "SECOND_VIDEO_VIEW";
 
     private static final int TYPE_FILE = 0;//本地文件
@@ -55,46 +55,28 @@ public class SecondVideoViewTexture extends TextureView {
         mCtx = context;
         mediaPlayer = new MediaPlayer();
 
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.i(TAG, "onComplete");
+        mediaPlayer.setOnCompletionListener(mediaPlayer -> {
+            Log.i(TAG, "onComplete");
+            load();
+        });
+
+        mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+            Log.d(TAG, "onError  " + what + " extra = " + extra);
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer = null;
+            mediaPlayer = new MediaPlayer();
+            return false;
+        });
+
+        mediaPlayer.setOnVideoSizeChangedListener((mp, width, height) -> {
+            if(width>1920 || height>1080){
                 load();
             }
         });
 
-        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                Log.d(TAG, "onError  " + what + " extra = " + extra);
-                mediaPlayer.reset();
-                mediaPlayer.release();
-                mediaPlayer = null;
-                mediaPlayer = new MediaPlayer();
-                return false;
-            }
-        });
 
-        setSurfaceTextureListener(new SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                mSurface = surface;
-                load();
-            }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {}
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-            }
-        });
+        setSurfaceTextureListener(this);
     }
 
     public SecondVideoViewTexture setUrl(List<String> urls) {
@@ -119,7 +101,6 @@ public class SecondVideoViewTexture extends TextureView {
         if(mediaPlayer!=null){
             return mediaPlayer.isPlaying();
         }
-
         return false;
     }
 
@@ -132,7 +113,6 @@ public class SecondVideoViewTexture extends TextureView {
         String path = mUrls.get(mCurrentIndex);
         File file = new File(path);
 
-        mCurrentIndex++;
         if (file.exists()) {
             //播放本地视频
             play(file.getPath(), TYPE_FILE);
@@ -140,35 +120,32 @@ public class SecondVideoViewTexture extends TextureView {
             //本地文件不存在, 播放在线视频；增加url有效性判断
             play(path, TYPE_URL);
         }
+        mCurrentIndex++;
     }
 
     private void play(String path, int type) {
-        //先判断视频分辨率
-        if(judgeVideoSize(path, type)){
-            if (mediaPlayer != null && mSurface != null) {
-                mediaPlayer.reset();
-                try {
-                    if(type==TYPE_FILE){
-                        //播放本地视频文件
-                        mediaPlayer.setDataSource(path);
-                    }else{
-                        //播放网络视频
-                        mediaPlayer.setDataSource(mCtx, Uri.parse(path));
-                    }
-                    Log.i(TAG, "file path: " + path);//播放在线视频是为视频缓存位置
-                    mediaPlayer.setSurface(new Surface(mSurface));
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                } catch (IOException e) {
-                    Log.e(TAG, "play: 视频解析出错，播放下一个！ ", e);
-                    load();
+        if (mediaPlayer != null && mSurface != null) {
+            mediaPlayer.reset();
+            try {
+                if(type==TYPE_FILE){
+                    //播放本地视频文件
+                    mediaPlayer.setDataSource(path);
+                }else{
+                    //播放网络视频
+                    mediaPlayer.setDataSource(mCtx, Uri.parse(path));
                 }
-            }else {
-                Log.i(TAG, "play: mediaPlayer == null || mSurface == null");
+                Log.i(TAG, "file path: " + path);//播放在线视频是为视频缓存位置
+                mediaPlayer.setSurface(new Surface(mSurface));
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    mediaPlayer.start();
+                });
+                mediaPlayer.prepareAsync();
+            } catch (IOException e) {
+                Log.e(TAG, "play: 视频解析出错，播放下一个！ ", e);
+                load();
             }
-        }else{
-            Log.e(TAG, "play: 视频分辨率过高无法播放！");
-            load();
+        }else {
+            Log.i(TAG, "play: mediaPlayer == null || mSurface == null");
         }
     }
 
@@ -223,31 +200,24 @@ public class SecondVideoViewTexture extends TextureView {
         }
     }
 
-    /**
-     * 获取视频第一帧 -> bitmap; api>10,
-     * 对于分辨率大于1920*1080的视频跳过
-     * true: 正常， false: 超出 有问题
-     * type: 0->file; 1->url
-     */
-    private boolean judgeVideoSize(String path, int type) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        if(type==TYPE_FILE){
-            //1. 本地文件
-            retriever.setDataSource(mCtx, Uri.fromFile(new File(path)));
-        }else if(type==TYPE_URL){
-            //2. 网络文件
-            retriever.setDataSource(path, new HashMap());
-        }else {
-            return false;
-        }
+    @Override
+    public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surface, int width, int height) {
+        mSurface = surface;
+        load();
+    }
 
-        String height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT); // 视频高度
-        String width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH); // 视频宽度
-        Log.i(TAG, "VideoSize: w: " + width + "\th: " + height);
+    @Override
+    public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surface, int width, int height) {
 
-        if(Integer.parseInt(width)>1921 || Integer.parseInt(height)>1081){
-            return false;
-        }
-        return true;
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surface) {
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
+
     }
 }

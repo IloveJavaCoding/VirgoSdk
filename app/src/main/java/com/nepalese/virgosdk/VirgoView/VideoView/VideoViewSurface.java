@@ -22,7 +22,7 @@ import java.util.List;
  * @author nepalese on 2020/10/22 14:28
  * @usage
  */
-public class VideoViewSurface extends SurfaceView {
+public class VideoViewSurface extends SurfaceView implements SurfaceHolder.Callback{
     private static final String TAG = "VideoViewSurface";
 
     private static final int TYPE_FILE = 0;//本地文件
@@ -54,43 +54,21 @@ public class VideoViewSurface extends SurfaceView {
         mCtx = context;
         mediaPlayer = new MediaPlayer();
 
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.i(TAG, "onComplete");
-                load();
-            }
+        mediaPlayer.setOnCompletionListener(mediaPlayer -> {
+            Log.i(TAG, "onComplete");
+            load();
         });
 
-        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                Log.d(TAG, "onError  " + what + " extra = " + extra);
-                mediaPlayer.reset();
-                mediaPlayer.release();
-                mediaPlayer = null;
-                mediaPlayer = new MediaPlayer();
-                return false;
-            }
+        mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+            Log.d(TAG, "onError  " + what + " extra = " + extra);
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer = null;
+            mediaPlayer = new MediaPlayer();
+            return false;
         });
 
-        getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
-                mSurface = surfaceHolder.getSurface();
-                load();
-            }
-
-            @Override
-            public void surfaceChanged(@NonNull SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
-                mSurface = null;
-            }
-        });
+        getHolder().addCallback(this);
     }
 
     public VideoViewSurface setUrl(List<String> urls) {
@@ -127,7 +105,6 @@ public class VideoViewSurface extends SurfaceView {
         }
         String path = mUrls.get(mCurrentIndex);
         File file = new File(path);
-        mCurrentIndex++;
 
         if (file.exists()) {
             //播放本地视频
@@ -136,17 +113,11 @@ public class VideoViewSurface extends SurfaceView {
             //本地文件不存在, 播放在线视频；增加url有效性判断
             play(path, TYPE_URL);
         }
+
+        mCurrentIndex++;
     }
 
     private void play(String path, int type) {
-        //先判断视频分辨率
-//        if(judgeVideoSize(path, type)){
-//
-//        }else{
-//            Log.e(TAG, "视频分辨率过高无法播放！");
-//            load();
-//        }
-
         if (mediaPlayer != null && mSurface != null) {
             mediaPlayer.reset();
             try {
@@ -159,8 +130,11 @@ public class VideoViewSurface extends SurfaceView {
                 }
                 Log.i(TAG, "file path: " + path);//播放在线视频是为视频缓存位置
                 mediaPlayer.setSurface(mSurface);
-                mediaPlayer.prepare();
-                mediaPlayer.start();
+
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    mediaPlayer.start();
+                });
+                mediaPlayer.prepareAsync();
             } catch (IOException e) {
                 Log.e(TAG, "视频解析出错，播放下一个！ ", e);
                 load();
@@ -221,31 +195,20 @@ public class VideoViewSurface extends SurfaceView {
         }
     }
 
-    /**
-     * 获取视频第一帧 -> bitmap; api>10,
-     * 对于分辨率大于1920*1080的视频跳过
-     * true: 正常， false: 超出 有问题
-     * type: 0->file; 1->url
-     */
-    private boolean judgeVideoSize(String path, int type) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        if(type==TYPE_FILE){
-            //1. 本地文件
-            retriever.setDataSource(mCtx, Uri.fromFile(new File(path)));
-        }else if(type==TYPE_URL){
-            //2. 网络文件
-            retriever.setDataSource(path, new HashMap());
-        }else {
-            return false;
-        }
-
-        String height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT); // 视频高度
-        String width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH); // 视频宽度
-        Log.i(TAG, "VideoSize: w: " + width + "\th: " + height);
-
-        if(Integer.parseInt(width)>1921 || Integer.parseInt(height)>1081){
-            return false;
-        }
-        return true;
+    @Override
+    public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
+        mSurface = surfaceHolder.getSurface();
+        load();
     }
+
+    @Override
+    public void surfaceChanged(@NonNull SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
+        mSurface = null;
+    }
+
 }

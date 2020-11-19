@@ -18,7 +18,7 @@ public class ResUtil {
     }
 
     // 获取资源文件drable的id
-    public static int getDrableId(Context context, String resName) {
+    public static int getDrawableId(Context context, String resName) {
         return context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
     }
 

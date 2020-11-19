@@ -171,9 +171,8 @@ public class VirgoVideoViewTexture extends TextureView implements MediaControlle
                     height = width * videoHeight / videoWidth;
                 }
             }
-        } else {
-            // no size yet, just adopt the given spec sizes
-        }
+        }  // no size yet, just adopt the given spec sizes
+
         Log.d(TAG, "onMeasure after: width = " + width + "\theight = " + height);
         setMeasuredDimension(width, height);
     }
@@ -351,11 +350,7 @@ public class VirgoVideoViewTexture extends TextureView implements MediaControlle
             mediaPlayer.setOnBufferingUpdateListener(onBufferingUpdateListener);
 
             curBufferPercentage = 0;
-            if (Build.VERSION.SDK_INT > 14) {
-                mediaPlayer.setDataSource(context, videoUri, header);
-            } else {
-                mediaPlayer.setDataSource(videoUri.toString());
-            }
+            mediaPlayer.setDataSource(context, videoUri, header);
             mediaPlayer.setSurface(new Surface(surfaceTexture));
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setScreenOnWhilePlaying(true);
@@ -736,20 +731,17 @@ public class VirgoVideoViewTexture extends TextureView implements MediaControlle
     };
 
     //音频焦点得失监听
-    private AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
-            @Override
-            public void onAudioFocusChange(int focusChange) {
-                if(focusChange == AudioManager.AUDIOFOCUS_LOSS){
-                    //失去焦点之后的操作
-                    if(isPlaying()){
-                        pause();
-                    }
-                }else if(focusChange == AudioManager.AUDIOFOCUS_GAIN){
-                    //获得焦点之后的操作
-                    if(curState==STATE_PAUSED){
-                        start();
-                    }
-                }
+    private AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener = focusChange -> {
+        if(focusChange == AudioManager.AUDIOFOCUS_LOSS){
+            //失去焦点之后的操作
+            if(isPlaying()){
+                pause();
             }
-        };
-    }
+        }else if(focusChange == AudioManager.AUDIOFOCUS_GAIN){
+            //获得焦点之后的操作
+            if(curState==STATE_PAUSED){
+                start();
+            }
+        }
+    };
+}

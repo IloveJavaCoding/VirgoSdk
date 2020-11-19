@@ -11,15 +11,14 @@ import java.util.Map;
 
 /**
  * @author nepalese on 2020/11/18 12:10
- * @usage
+ * @usage Json 转换
  * Lib： gson-2.7.jar
  */
 public class JsonUtil {
     public static Object getObject(String json, Type class1) {
         try {
             Gson gson = (new GsonBuilder()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-            Object object = gson.fromJson(json.trim(), class1);
-            return object;
+            return gson.fromJson(json.trim(), class1);
         } catch (Exception var4) {
             var4.printStackTrace();
             return null;
@@ -38,15 +37,14 @@ public class JsonUtil {
     public static Object getObject(String json, TypeToken token) {
         try {
             Gson gson = new Gson();
-            Object object = gson.fromJson(json.trim(), token.getType());
-            return object;
+            return gson.fromJson(json.trim(), token.getType());
         } catch (Exception var4) {
             return "";
         }
     }
 
     public static String stringToJson(Map<?, ?> string_map) {
-        String json = "";
+        String json;
         JSONObject object = new JSONObject(string_map);
         json = object.toString();
         return json;

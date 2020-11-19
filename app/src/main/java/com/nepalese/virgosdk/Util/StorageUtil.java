@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +24,7 @@ public class StorageUtil {
     //====================================get system memory info====================================
     //外部存储情况
     public static long getExternalStorageSpace(String type){
-        File file = Environment.getExternalStorageDirectory();
+        File file = Environment.getStorageDirectory(); //getExternalStorageDirectory();
         if (file.exists()){
             switch (type){
                 case TYPE_TOTAL:
@@ -80,6 +79,7 @@ public class StorageUtil {
             e.printStackTrace();
         } finally{
             try {
+                assert inputStream != null;
                 inputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -92,15 +92,16 @@ public class StorageUtil {
     public static long getFileSize(File file) {
         long size = -1;
         if (file.exists()) {
-            FileInputStream fis = null;
+            FileInputStream inputStream = null;
             try {
-                fis = new FileInputStream(file);//使用FileInputStream读入file的数据流
-                size = fis.available();//文件的大小
+                inputStream = new FileInputStream(file);//使用FileInputStream读入file的数据流
+                size = inputStream.available();//文件的大小
             } catch (IOException e) {
                 e.printStackTrace();
             } finally{
                 try {
-                    fis.close();
+                    assert inputStream != null;
+                    inputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

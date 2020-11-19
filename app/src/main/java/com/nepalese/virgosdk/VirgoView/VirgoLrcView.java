@@ -17,10 +17,10 @@ import android.widget.OverScroller;
 
 import androidx.annotation.Nullable;
 
-import com.nepalese.virgosdk.Events.RefershLrcLine;
+import com.nepalese.virgosdk.Events.LrcViewRefreshLineEvent;
 import com.nepalese.virgosdk.R;
 import com.nepalese.virgosdk.Util.BitmapUtil;
-import com.nepalese.virgosdk.Util.ConvertUtil;
+import com.nepalese.virgosdk.Util.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -38,7 +38,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VirgoLrcView extends View {
-    private final String TAG = "MY_LRC_VIEW";
+    private static final String TAG = "VirgoLrcView";
     private Context context;
 
     private Paint mainPaint, secPaint;
@@ -223,7 +223,7 @@ public class VirgoLrcView extends View {
 
         if(curLine<lineList.size()-1){
             long time = lineList.get(curLine).getTime();
-            EventBus.getDefault().post(new RefershLrcLine(time));
+            EventBus.getDefault().post(new LrcViewRefreshLineEvent(time));
         }
     }
 
@@ -271,7 +271,7 @@ public class VirgoLrcView extends View {
     }
 
     public void setBackground(Bitmap background) {
-        this.background = BitmapUtil.fastBlurBitmap(background, 200);
+        this.background = BitmapUtil.blurBitmap(background, 200);
     }
 
     private void reset(){
@@ -307,7 +307,7 @@ public class VirgoLrcView extends View {
         if(file.exists()){
             reset();
             String format;
-            if(ConvertUtil.isUtf8(file)){
+            if(FileUtil.isUtf8(file)){
                 format = "UTF-8";
             }else{//utf_8
                 format = "GBK";
@@ -387,10 +387,10 @@ public class VirgoLrcView extends View {
     }
 
     private void parseLine(String line) {
-        Matcher matcher = Pattern.compile("\\[\\d.+\\].+").matcher(line);
+        Matcher matcher = Pattern.compile("\\[\\d.+].+").matcher(line);
         // 如果形如：[xxx]后面啥也没有的，则return空
         if (!matcher.matches()) {
-            Long time;
+            long time;
             String str;
             String con = line.replace("\\[", "").replace("\\]", "");
             Log.d(TAG, con);
@@ -406,7 +406,7 @@ public class VirgoLrcView extends View {
 
         //[00:23.24]让自己变得快乐
         line = line.replaceAll("\\[", "");
-        String[] result = line.split("\\]");
+        String[] result = line.split("]");
         lineList.add(new MyLrcLine(parseTime(result[0]), result[1]));
     }
 }

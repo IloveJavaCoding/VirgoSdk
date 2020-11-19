@@ -4,11 +4,11 @@ public class AudioFile extends BaseBean{
     private long sId;
     private String sName;
     private String sDName;
-    private String sSinger;
+    private String aArtist;
     private String sPath;
-    private String sAlbum;
-    private long sLogo;
-    private int sLength;//duration
+    private String sAlbum;//专辑
+    private long sLogo; //图片id
+    private int sDuration;//duration
     private long sSize;
 
     public String getsDName() {
@@ -51,12 +51,12 @@ public class AudioFile extends BaseBean{
         this.sName = sName;
     }
 
-    public String getsSinger() {
-        return sSinger;
+    public String getaArtist() {
+        return aArtist;
     }
 
-    public void setsSinger(String sSinger) {
-        this.sSinger = sSinger;
+    public void setaArtist(String aArtist) {
+        this.aArtist = aArtist;
     }
 
     public String getsPath() {
@@ -75,11 +75,11 @@ public class AudioFile extends BaseBean{
         this.sAlbum = sAlbum;
     }
 
-    public int getsLength() {
-        return sLength;
+    public int getsDuration() {
+        return sDuration;
     }
 
-    public void setsLength(int sLength) {
-        this.sLength = sLength;
+    public void setsDuration(int sDuration) {
+        this.sDuration = sDuration;
     }
 }

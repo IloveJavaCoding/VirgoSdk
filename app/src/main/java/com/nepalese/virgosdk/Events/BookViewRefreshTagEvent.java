@@ -1,9 +1,9 @@
 package com.nepalese.virgosdk.Events;
 
-public class RefershBookTagEvent {
+public class BookViewRefreshTagEvent {
     private int tag;
 
-    public RefershBookTagEvent(int tag) {
+    public BookViewRefreshTagEvent(int tag) {
         this.tag = tag;
     }
 

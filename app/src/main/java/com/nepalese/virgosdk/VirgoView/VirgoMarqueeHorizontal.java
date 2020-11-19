@@ -5,16 +5,20 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class VirgoMarqueeHorizontal extends View implements Runnable {
-    private final String TAG = "MARQUEE_HORIZONTAL";
+public class VirgoMarqueeHorizontal extends View{
+    private static final String TAG = "VirgoMarqueeHorizontal";
 
     private Paint paint;
     private int viewWidth;
@@ -29,8 +33,7 @@ public class VirgoMarqueeHorizontal extends View implements Runnable {
 
     private String contents;
     private int backgroundColor = Color.BLACK;
-
-    private Thread thread;
+    private final int FLASH_INTERVAL = 50;//ms
 
     public VirgoMarqueeHorizontal(Context context) {
         this(context, null);
@@ -42,10 +45,10 @@ public class VirgoMarqueeHorizontal extends View implements Runnable {
 
     public VirgoMarqueeHorizontal(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(attrs);
+        init();
     }
 
-    private void init(AttributeSet attrs) {
+    private void init() {
         //解析自定义属性...未加
 
         rect = new Rect();
@@ -57,9 +60,29 @@ public class VirgoMarqueeHorizontal extends View implements Runnable {
     }
 
     private void startRoll() {
-        thread = new Thread(this);
-        thread.start();
+        stopTask();
+        handler.post(rollTask);
     }
+
+    private void stopTask(){
+        handler.removeCallbacks(rollTask);
+    }
+
+    private final Runnable rollTask = new Runnable() {
+        @Override
+        public void run() {
+            if(!TextUtils.isEmpty(contents)) {
+                if(getScrollX()>viewWidth+getTextWidth(contents)){
+                    scrollTo(0,0);
+                }
+
+                scrollBy(speed, 0);
+                postInvalidate();
+
+                handler.postDelayed(rollTask, FLASH_INTERVAL);
+            }
+        }
+    };
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -86,18 +109,18 @@ public class VirgoMarqueeHorizontal extends View implements Runnable {
         if(textWidth < viewWidth){
             String blank = getBlanks(contents.length());
             int times = (int) (viewWidth / textWidth) + 1;
-            String newCont = "";
+            StringBuilder newCont = new StringBuilder();
             if(times%2==0){
                 for(int i=0; i<times/2; i++){
-                    newCont += (contents + blank);
+                    newCont.append(contents).append(blank);
                 }
             }else{
                 for(int i=0; i<times/2; i++){
-                    newCont += (contents + blank);
+                    newCont.append(contents).append(blank);
                 }
-                newCont += contents;
+                newCont.append(contents);
             }
-            contents = newCont;
+            contents = newCont.toString();
         }
         Log.i(TAG, "conts: " + contents);
     }
@@ -113,7 +136,7 @@ public class VirgoMarqueeHorizontal extends View implements Runnable {
     }
 
     private float getTextWidth(String str){
-        if (str == null || str == "") {
+        if (str == null || str.equals("")) {
             return 0;
         }
         if (rect == null) {
@@ -122,22 +145,6 @@ public class VirgoMarqueeHorizontal extends View implements Runnable {
         paint.getTextBounds(str, 0, str.length(), rect);
 
         return rect.width();
-    }
-
-    @Override
-    public void run() {
-        while (!TextUtils.isEmpty(contents)) {
-            if(getScrollX()>viewWidth+getTextWidth(contents)){
-                scrollTo(0,0);
-            }
-            try {
-                Thread.sleep(50);
-                scrollBy(speed, 0);
-                postInvalidate();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public void setContents(String contents) {
@@ -165,5 +172,18 @@ public class VirgoMarqueeHorizontal extends View implements Runnable {
 
     private int sp2px(float spValue) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, spValue, getResources().getDisplayMetrics());
+    }
+
+    private Handler handler = new Handler(Looper.myLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+        }
+    };
+
+    @Override
+    protected void onDetachedFromWindow() {
+        stopTask();
+        super.onDetachedFromWindow();
     }
 }

@@ -109,7 +109,6 @@ public class BitmapUtil {
         return BitmapFactory.decodeByteArray(bytes,0, bytes.length);
     }
 
-
     //======================================bitmap 获取=============================================
     //从资源文件中获取bitmap
     public static Bitmap getBitmapFromRes(Context context, int id){

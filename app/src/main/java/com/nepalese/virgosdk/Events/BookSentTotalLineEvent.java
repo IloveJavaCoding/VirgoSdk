@@ -1,9 +1,9 @@
 package com.nepalese.virgosdk.Events;
 
-public class SentTotalLineEvent {
+public class BookSentTotalLineEvent {
     private int totalLines;
 
-    public SentTotalLineEvent(int totalLines) {
+    public BookSentTotalLineEvent(int totalLines) {
         this.totalLines = totalLines;
     }
 

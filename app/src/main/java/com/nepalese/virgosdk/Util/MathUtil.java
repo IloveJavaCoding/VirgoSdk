@@ -2,6 +2,10 @@ package com.nepalese.virgosdk.Util;
 
 import java.math.BigDecimal;
 
+/**
+ * @author nepalese on 2020/11/18 11:30
+ * @usage 数学计算：随机数，设置精度，数据校验（异或，CRC)
+ */
 public class MathUtil {
     //get random number
     public static double getRandomNum(double a, double b) {
@@ -12,32 +16,33 @@ public class MathUtil {
         return (int) (Math.random() * (b - a)) + a;
     }
 
-    //set the scale of decimal
-    public static double setDecimalDot(double value, int scale) {
+    //设置精度
+    public static double setNumberScale(double value, int scale) {
         BigDecimal bd = new BigDecimal(value);
         return bd.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
-        //String .format("%.2f",d);
     }
 
+    public static String setNumberScale2(double value, int scale) {
+        String format = "%." + scale + "f";
+        return String .format(format, value);
+    }
+
+    //计算由2B组成的数据长度(高位在前)
     private int getDataLength(byte b1, byte b2) {
-        int temp1 = b1 << 8 & 0xffff;
-        int temp2 = b2 & 0xff;
-        return temp1 + temp2;
-//        return (b1 << 8 & 0xffff) | (b2 & 0xff);
+//        int temp1 = b1 << 8 & 0xffff;
+//        int temp2 = b2 & 0xff;
+//        return temp1 + temp2;
+        return (b1 << 8 & 0xffff) | (b2 & 0xff);
     }
 
-    private String decimal2Hex(int a) {
-        String out = Integer.toHexString(a);
-        if(out.length()==1){
-            out = "0" + out;
-        }
-        return out;
-    }
-
-    //异或校验 最后两位为校验值
-    private byte getXor(byte[] data, int mDataBufLen) {
+    /**
+     * 异或校验 最后两位为校验值
+     * @param data 全部数据
+     * @return 校验结果
+     */
+    private byte getXor(byte[] data) {
         byte temp = data[0];
-        for (int i = 1; i < mDataBufLen - 2; i++) {
+        for (int i = 1; i < data.length - 2; i++) {
             temp ^= data[i];
         }
         return temp;

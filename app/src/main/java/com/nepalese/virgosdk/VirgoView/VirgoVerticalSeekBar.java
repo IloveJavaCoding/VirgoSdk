@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.SeekBar;
 
 public class VirgoVerticalSeekBar extends androidx.appcompat.widget.AppCompatSeekBar {
     private static final String TAG = "VirgoVerticalSeekBar";

@@ -4,19 +4,24 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.OverScroller;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VirgoMarqueeVertical extends View implements Runnable{
-    private final String TAG = "MARQUEE_VERTICAL";
+public class VirgoMarqueeVertical extends View {
+    private static final String TAG = "VirgoMarqueeVertical";
 
     private Paint paint;
     private int viewWidth;
@@ -36,7 +41,6 @@ public class VirgoMarqueeVertical extends View implements Runnable{
     private int offset=0;//记录画布滚动距离
 
     private int delay = 3000;//滚动间隔
-    private Thread thread;//控制自动滚动
     private OverScroller scroller;//使滚动效果跟平滑
     
     public VirgoMarqueeVertical(Context context) {
@@ -49,10 +53,10 @@ public class VirgoMarqueeVertical extends View implements Runnable{
 
     public VirgoMarqueeVertical(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
+        init(context);
     }
 
-    private void init(Context context, AttributeSet attrs) {
+    private void init(Context context) {
         //解析自定义属性...未加
 
         //初始化画笔
@@ -90,9 +94,32 @@ public class VirgoMarqueeVertical extends View implements Runnable{
     }
 
     private void startRoll() {
-        thread = new Thread(this);
-        thread.start();
+        stopTask();
+        handler.post(rollTask);
     }
+
+    private void stopTask(){
+        handler.removeCallbacks(rollTask);
+    }
+
+    private final Runnable rollTask = new Runnable() {
+        @Override
+        public void run() {
+            if(list.size()>1){
+                Log.i(TAG, "offset: " + offset);
+                if(offset>=viewHeight*(list.size()-1)){
+                    scrollTo(0,0);
+                    offset = -viewHeight;
+                }
+
+                scroller.startScroll(0, offset, 0, viewHeight);
+                offset += viewHeight;
+                postInvalidate();
+
+                handler.postDelayed(rollTask, delay);
+            }
+        }
+    };
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -113,27 +140,6 @@ public class VirgoMarqueeVertical extends View implements Runnable{
         if(scroller.computeScrollOffset()){
             scrollTo(scroller.getCurrX(), scroller.getCurrY());
             invalidate();
-        }
-    }
-
-    @Override
-    public void run() {
-        if(list.size()>1){
-            for(;;){
-                Log.i(TAG, "offset: " + offset);
-                if(offset>=viewHeight*(list.size()-1)){
-                    scrollTo(0,0);
-                    offset = -viewHeight;
-                }
-                try {
-                    Thread.sleep(delay);
-                    scroller.startScroll(0, offset, 0, viewHeight);
-                    offset += viewHeight;
-                    postInvalidate();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -162,5 +168,18 @@ public class VirgoMarqueeVertical extends View implements Runnable{
 
     private int sp2px(float spValue) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, spValue, getResources().getDisplayMetrics());
+    }
+
+    private Handler handler = new Handler(Looper.myLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+        }
+    };
+
+    @Override
+    protected void onDetachedFromWindow() {
+        stopTask();
+        super.onDetachedFromWindow();
     }
 }

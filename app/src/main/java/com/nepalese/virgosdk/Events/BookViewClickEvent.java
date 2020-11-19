@@ -1,9 +1,9 @@
 package com.nepalese.virgosdk.Events;
 
-public class ClickEvent {
+public class BookViewClickEvent {
     private boolean isShow;
 
-    public ClickEvent(boolean isShow) {
+    public BookViewClickEvent(boolean isShow) {
         this.isShow = isShow;
     }
 

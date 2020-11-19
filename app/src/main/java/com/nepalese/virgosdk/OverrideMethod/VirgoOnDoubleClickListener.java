@@ -1,4 +1,4 @@
-package com.nepalese.virgosdk.Manager;
+package com.nepalese.virgosdk.OverrideMethod;
 
 import android.view.MotionEvent;
 import android.view.View;
@@ -6,12 +6,12 @@ import android.view.View;
 public class VirgoOnDoubleClickListener implements View.OnTouchListener{
     private int count = 0;//点击次数
     private long firstClick = 0;//第一次点击时间
-    private long secondClick = 0;//第二次点击时间
     private final int duration = 500;//预设两次点击最多间隔时间
 
     private Callback callback;
 
     public interface Callback{
+        //具化双击后要执行的任务
         void onDoubleClick();
     }
 
@@ -26,7 +26,8 @@ public class VirgoOnDoubleClickListener implements View.OnTouchListener{
             if (count == 1){
                 firstClick = System.currentTimeMillis();
             }else if (count == 2){
-                secondClick = System.currentTimeMillis();
+                //第二次点击时间
+                long secondClick = System.currentTimeMillis();
                 if (secondClick - firstClick<=duration){
                     if (callback!=null){
                         callback.onDoubleClick();//调用重写方法
@@ -39,7 +40,6 @@ public class VirgoOnDoubleClickListener implements View.OnTouchListener{
                     firstClick = secondClick;
                     count = 1;
                 }
-                secondClick = 0;
             }
         }
         //最后要返回false 否则单击事件会被屏蔽掉

@@ -47,9 +47,7 @@ public class SIMOperatorUtil {
     public boolean isMobileDataEnabled() {
         try {
             Method getDataEnabled = telephonyManager.getClass().getDeclaredMethod("getDataEnabled");
-            if (null != getDataEnabled) {
-                return (Boolean) getDataEnabled.invoke(telephonyManager);
-            }
+            return (Boolean) getDataEnabled.invoke(telephonyManager);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -60,9 +58,7 @@ public class SIMOperatorUtil {
     public void setMobileDataEnabled(boolean enabled) {
         try {
             Method setDataEnabled = telephonyManager.getClass().getDeclaredMethod("setDataEnabled", boolean.class);
-            if (null != setDataEnabled) {
-                setDataEnabled.invoke(telephonyManager, enabled);
-            }
+            setDataEnabled.invoke(telephonyManager, enabled);
         } catch (Exception e) {
             e.printStackTrace();
         }

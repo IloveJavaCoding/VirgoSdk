@@ -7,10 +7,9 @@ import java.util.regex.Pattern;
 
 /**
  * @author nepalese on 2020/11/18 12:04
- * @usage 匹配，筛选数据
+ * @usage 正则匹配，筛选数据
  */
 public class MatchUtil {
-    //提取手机号码
 
     //输入手机号码格式是否正确
     public static boolean matchPhoneNumber(String mobile) {

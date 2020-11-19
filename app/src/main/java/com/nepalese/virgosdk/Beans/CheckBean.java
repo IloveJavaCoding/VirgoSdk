@@ -2,7 +2,7 @@ package com.nepalese.virgosdk.Beans;
 
 /**
  * @author nepalese on 2020/11/2 09:20
- * @usage
+ * @usage 记录listview 内 CheckBox 选中情况
  */
 public class CheckBean {
     private int id;

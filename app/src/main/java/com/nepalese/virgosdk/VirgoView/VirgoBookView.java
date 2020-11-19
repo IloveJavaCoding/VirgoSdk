@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -16,11 +15,11 @@ import android.widget.OverScroller;
 
 import androidx.annotation.Nullable;
 
-import com.nepalese.virgosdk.Events.ClickEvent;
-import com.nepalese.virgosdk.Events.RefershBookTagEvent;
-import com.nepalese.virgosdk.Events.SentTotalLineEvent;
+import com.nepalese.virgosdk.Events.BookSentTotalLineEvent;
+import com.nepalese.virgosdk.Events.BookViewClickEvent;
+import com.nepalese.virgosdk.Events.BookViewRefreshTagEvent;
 import com.nepalese.virgosdk.R;
-import com.nepalese.virgosdk.Util.ConvertUtil;
+import com.nepalese.virgosdk.Util.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -37,7 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VirgoBookView extends View {
-    private final String TAG = "BOOK_VIEW";
+    private static final String TAG = "VirgoBookView";
     private Paint paint;
     private int viewWidth;
     //viewHeight: the height of view displayed; viewHeightAll: the real height of bookView;
@@ -177,7 +176,7 @@ public class VirgoBookView extends View {
         canvas.drawColor(bgColor);
 
         if(lines==null){
-            canvas.drawText("No contents!", 0, viewHeight/2, paint);
+            canvas.drawText("No contents!", 0, viewHeight/2f, paint);
             return;
         }
 
@@ -265,18 +264,14 @@ public class VirgoBookView extends View {
                 if(Math.abs(x-startX)<10 && Math.abs(y-startY)<10){
                     //click
                     Log.d(TAG, "click......" + isShow);
-                    EventBus.getDefault().post(new ClickEvent(isShow));
-                    if(isShow){
-                        isShow = false;
-                    }else{
-                        isShow = true;
-                    }
+                    EventBus.getDefault().post(new BookViewClickEvent(isShow));
+                    isShow = !isShow;
                 }
                 else{
                     if(readMode==MODE_PAGE){
                         flashPage(x);
                         //save tag
-                        EventBus.getDefault().post(new RefershBookTagEvent(firstIndex));
+                        EventBus.getDefault().post(new BookViewRefreshTagEvent(firstIndex));
                     }
                     else{
                         //slip mode
@@ -292,7 +287,7 @@ public class VirgoBookView extends View {
                             Log.i(TAG, "slow slip velocity: " + velocityY);
                         }
                         recycleVelocityTracker();
-                        EventBus.getDefault().post(new RefershBookTagEvent(getCurLines()));
+                        EventBus.getDefault().post(new BookViewRefreshTagEvent(getCurLines()));
                     }
                 }
                 break;
@@ -417,7 +412,7 @@ public class VirgoBookView extends View {
         Log.d(TAG, "parsePath "+ path);
         if(file.exists()){
             String format;
-            if(ConvertUtil.isUtf8(file)){
+            if(FileUtil.isUtf8(file)){
                 format = "UTF-8";
             }else{//utf_8
                 format = "GBK";
@@ -471,18 +466,18 @@ public class VirgoBookView extends View {
         String[] sections = contents.split("。");
 
         //"\\u300" 中文缩进一个字；
-        for(int i=0; i<sections.length; i++){
-            String section = "\u3000\u3000" + sections[i] + "。";
-            int tempRows = section.length() % numInRow==0? section.length() / numInRow: section.length() / numInRow +1;
+        for (String s : sections) {
+            String section = "\u3000\u3000" + s + "。";
+            int tempRows = section.length() % numInRow == 0 ? section.length() / numInRow : section.length() / numInRow + 1;
 
-            for(int j=0; j<tempRows; j++){
-                String temp = section.substring(numInRow*j, Math.min(numInRow*(j+1), section.length()));
+            for (int j = 0; j < tempRows; j++) {
+                String temp = section.substring(numInRow * j, Math.min(numInRow * (j + 1), section.length()));
                 lines.add(temp);
             }
         }
 
         Log.d(TAG, "lines size: " + lines.size());
         totalRows = lines.size();
-        EventBus.getDefault().post(new SentTotalLineEvent(totalRows));
+        EventBus.getDefault().post(new BookSentTotalLineEvent(totalRows));
     }
 }

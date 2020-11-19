@@ -2,6 +2,8 @@ package com.nepalese.virgosdk.Util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.File;
@@ -75,4 +77,40 @@ public class InternetUtil {
         }
     }
 
+    /* : 检测当前url是否有效可连, 需在子线程进行
+     * @param url 需校验的url
+     * @param max 最大尝试次数
+     * @return
+     */
+    public boolean validUrl(String urlStr, int max) {
+        if(urlStr == null || urlStr.length()<=0) {
+            return false;
+        }
+
+        int count = 1;
+        int code;
+        HttpURLConnection connection;
+
+        while(count<=max) {
+            try {
+                URL url = new URL(urlStr);
+                connection = (HttpURLConnection) url.openConnection();
+                code = connection.getResponseCode();
+                Log.d(TAG, "validUrl: count: " + count + "\tcode: " + code);
+
+                if(code==200) {
+                    //有效url
+                    return true;
+                }
+                //code != 200
+                count++;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                //出现异常
+                count++;
+            }
+        }
+        return false;
+    }
 }

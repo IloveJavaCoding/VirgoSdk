@@ -42,32 +42,16 @@ public class VirgoVideoViewTextureChild extends VirgoVideoViewTexture {
 
     private void init(){
         setLooping(false);
-        setCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "onCompletion: complete");
-                load();
-            }
+        setCompletionListener(mediaPlayer -> {
+            Log.d(TAG, "onCompletion: complete");
+            load();
         });
 
-        setErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
-                load();
-                return true;
-            }
+        setErrorListener((mediaPlayer, i, i1) -> {
+            load();
+            return true;
         });
 
-        //获取视频分辨率
-        setSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-            @Override
-            public void onVideoSizeChanged(MediaPlayer mediaPlayer, int w, int h) {
-                if (w > 1920 || h > 1080) {
-                    Log.e(TAG, "big resolution!");
-                    load();
-                }
-            }
-        });
         //设置系统默认的视频控制器（时间条，播放、暂停，前进、后退）
 //        setMediaController(new MediaController(context));
     }

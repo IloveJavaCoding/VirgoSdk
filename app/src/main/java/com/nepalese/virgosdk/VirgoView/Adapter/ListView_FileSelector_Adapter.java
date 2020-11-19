@@ -87,11 +87,11 @@ public class ListView_FileSelector_Adapter extends BaseAdapter {
                 case "mp3":
                 case "wav":
                 case "mp4":
-                    holder.imageView.setImageBitmap(MediaUtil.parseAlbum(context, data.get(position), R.drawable.icon_media));
+                    holder.imageView.setImageBitmap(MediaUtil.getVideoThumb(new File(path), 32, 32));
                     break;
                 case "jpg":
                 case "png":
-                    holder.imageView.setImageBitmap(MediaUtil.getImageThumbnail(context, path));
+                    holder.imageView.setImageBitmap(MediaUtil.getImageThumb(new File(path), 32,32));
                     break;
                 default:
                     holder.imageView.setImageResource(R.drawable.icon_file);
@@ -101,22 +101,11 @@ public class ListView_FileSelector_Adapter extends BaseAdapter {
 
         //make component be able click from outside
         //防止CheckBox因滚动ListView时混乱
-        holder.checkBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                beans.get(position).setChecked(!beans.get(position).isChecked());
-                interListener.itemClick(view, beans.get(position).isChecked());
-                holder.checkBox.setChecked(beans.get(position).isChecked());
-            }
+        holder.checkBox.setOnClickListener(view -> {
+            beans.get(position).setChecked(!beans.get(position).isChecked());
+            interListener.itemClick(view, beans.get(position).isChecked());
+            holder.checkBox.setChecked(beans.get(position).isChecked());
         });
-
-//        holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-//                beans.get(position).setChecked(b);
-//                interListener.itemClick(compoundButton, b);
-//            }
-//        });
 
         holder.checkBox.setChecked(beans.get(position).isChecked());
         holder.checkBox.setTag(position);

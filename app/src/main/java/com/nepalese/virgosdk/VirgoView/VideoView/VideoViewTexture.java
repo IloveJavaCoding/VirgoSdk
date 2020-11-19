@@ -18,12 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * 副屏播放器
- * 1. 无法使用surfaceView
- * 2. 无法播放分辨率过高视频：已知4k无法播放
- */
-public class VideoViewTexture extends TextureView {
+public class VideoViewTexture extends TextureView implements TextureView.SurfaceTextureListener {
     private static final String TAG = "VideoViewTexture";
 
     private static final int TYPE_FILE = 0;//本地文件
@@ -55,46 +50,21 @@ public class VideoViewTexture extends TextureView {
         mCtx = context;
         mediaPlayer = new MediaPlayer();
 
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.i(TAG, "onComplete");
-                load();
-            }
+        mediaPlayer.setOnCompletionListener(mediaPlayer -> {
+            Log.i(TAG, "onComplete");
+            load();
         });
 
-        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                Log.d(TAG, "onError  " + what + " extra = " + extra);
-                mediaPlayer.reset();
-                mediaPlayer.release();
-                mediaPlayer = null;
-                mediaPlayer = new MediaPlayer();
-                return false;
-            }
+        mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+            Log.d(TAG, "onError  " + what + " extra = " + extra);
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer = null;
+            mediaPlayer = new MediaPlayer();
+            return false;
         });
 
-        setSurfaceTextureListener(new SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                mSurface = surface;
-                load();
-            }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {}
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-            }
-        });
+        setSurfaceTextureListener(this);
     }
 
     public VideoViewTexture setUrl(List<String> urls) {
@@ -155,8 +125,8 @@ public class VideoViewTexture extends TextureView {
                 }
                 Log.i(TAG, "file path: " + path);//播放在线视频是为视频缓存位置
                 mediaPlayer.setSurface(new Surface(mSurface));
-                mediaPlayer.prepare();
-                mediaPlayer.start();
+                mediaPlayer.setOnPreparedListener(mp -> mediaPlayer.start());
+                mediaPlayer.prepareAsync();
             } catch (IOException e) {
                 Log.e(TAG, "play: 视频解析出错，播放下一个！ ", e);
                 load();
@@ -215,5 +185,26 @@ public class VideoViewTexture extends TextureView {
                 mediaPlayer.start();
             }
         }
+    }
+
+    @Override
+    public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surface, int width, int height) {
+        mSurface = surface;
+        load();
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surface, int width, int height) {
+
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surface) {
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
+
     }
 }

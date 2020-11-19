@@ -17,7 +17,7 @@ import java.util.Collections;
  * Lib: zip4j-1.3.2.jar
  */
 public class ZipUtil {
-    //===========================zip/unzip file/dir==============================
+    //====================================zip/unzip file/dir========================================
     public static void unZip(String path, String aimPath, String password) throws ZipException {
         File file = new File(path);
         if(!file.exists()){
@@ -46,6 +46,7 @@ public class ZipUtil {
             zipFile.extractAll(aimPath);
         }else{//unzip to current path
             File parentDir = file.getParentFile();
+            assert parentDir != null;
             unZipFile(file, parentDir.getAbsolutePath(), password);
         }
     }
@@ -71,6 +72,7 @@ public class ZipUtil {
                 // 如果不创建目录的话,将直接把给定目录下的文件压缩到压缩文件,即没有目录结构
                 File[] subFiles = file.listFiles();
                 ArrayList<File> temp = new ArrayList<File>();
+                assert subFiles != null;
                 Collections.addAll(temp, subFiles);
                 zipFile.addFiles(temp, parameters);
             } else {
@@ -106,7 +108,7 @@ public class ZipUtil {
     }
 
     private static void createDestDirectoryIfNecessary(String destParam) {
-        File destDir = null;
+        File destDir;
         if (destParam.endsWith(File.separator)) {
             destDir = new File(destParam);
         } else {

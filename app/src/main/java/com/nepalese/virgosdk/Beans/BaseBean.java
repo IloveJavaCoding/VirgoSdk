@@ -1,6 +1,5 @@
 package com.nepalese.virgosdk.Beans;
 
-import com.nepalese.virgosdk.Util.ConvertUtil;
 import com.nepalese.virgosdk.Util.JsonUtil;
 
 import java.io.Serializable;

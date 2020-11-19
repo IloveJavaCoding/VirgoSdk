@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 
 /**
  * @author nepalese on 2020/9/4 17:22
- * @usage
+ * @usage 有关显示操作： 横竖屏旋转，截屏，屏幕宽高，键盘显隐，亮度调节
  */
 public class ScreenUtil {
     private static final String TAG = "ScreenUtil";
@@ -62,15 +62,15 @@ public class ScreenUtil {
         RuntimeExec.takeScreenShot(path);
     }
 
-    //==============================================================================================
+    //====================================获取屏幕显示指标===========================================
     /**
      * 获取屏幕显示指标对象
      * @return DisplayMetrics //dm.widthPixels;  //dm.heightPixels;
+     * WindowManager)context.getSystemService(Context.WINDOW_SERVICE).getDefaultDisplay().getMetrics(dm); Deprecated
      */
     public static DisplayMetrics getScreenDM(Context context) {
-        WindowManager manager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
-        manager.getDefaultDisplay().getMetrics(dm);
+        context.getDisplay().getRealMetrics(dm);
 
         return dm;
     }
@@ -138,7 +138,7 @@ public class ScreenUtil {
     }
 
     /**
-     * 禁止Edittext弹出软件盘，光标依然正常显示。
+     * 禁止EditText弹出软件盘，光标依然正常显示。
      */
     public static void prohibitShowSoftInput(EditText editText) {
         Class<EditText> cls = EditText.class;
@@ -155,7 +155,7 @@ public class ScreenUtil {
     //==========================================屏幕亮度============================================
     //设置当前屏幕亮度值 0--255，并使之生效
     public static void setScreenBrightness(Activity act, float value) {
-        value = value>255.0f? 255.0f: value< 0.0f? 0.0f: value;
+        value = value>255.0f? 255.0f : Math.max(value, 0.0f);
         WindowManager.LayoutParams lp = act.getWindow().getAttributes();
         lp.screenBrightness = lp.screenBrightness + (value) / 255.0f;
         if (lp.screenBrightness > 1) {
@@ -178,7 +178,7 @@ public class ScreenUtil {
         return 0;
     }
 
-    //自动调节亮度
+    //自动调节亮度？
     public static boolean isAutoBrightness(Activity activity) {
         try {
             int autoBrightness = Settings.System.getInt(

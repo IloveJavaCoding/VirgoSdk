@@ -2,7 +2,7 @@ package com.nepalese.virgosdk.Beans;
 
 /**
  * @author nepalese on 2020/9/23 17:13
- * @usage
+ * @usage 下载项
  */
 public class DownloadItem extends BaseBean{
     private String url;

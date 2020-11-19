@@ -4,6 +4,10 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.util.Log;
 
+/**
+ * @author nepalese on 2020/10/18 15:43
+ * @usage 系统媒体音量控制： 音量获取、设置，静音开关，音量加减
+ */
 public class VolumeUtil {
     private static final String TAG = "VolumeUtil";
 
@@ -11,6 +15,11 @@ public class VolumeUtil {
     public static void setVolume(Context context, float value){
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (manager!=null){
+            if(value>100){
+                value = 100;
+            }else if(value<0){
+                value = 0;
+            }
             int maxVolume = manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
             int volume = (int) (value/ 100 * maxVolume);
             manager.setStreamVolume(AudioManager.STREAM_MUSIC,volume,AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);

@@ -80,14 +80,14 @@ public class ConvertUtil {
     //=======================================字符串<-->十六进制======================================
     //字符串转换为16进制字符串
     public static String string2Hex(String str){
-        String out = "";
+        StringBuilder out = new StringBuilder();
         for(int i=0;i<str.length();i++){
             int ch = str.charAt(i);
             String temp = Integer.toHexString(ch);
-            out += temp;
+            out.append(temp);
         }
 
-        return out;
+        return out.toString();
     }
 
     //转换十六进制编码为字符串
@@ -136,26 +136,20 @@ public class ConvertUtil {
     }
 
     private static int char2Int(char c){
-        if(c>'f'||c>'F'){
+        if(c > 'F'){
             return -1;
         }
         switch (c){
-            case 'f':
             case 'F':
                 return 15;
-            case 'e':
             case 'E':
                 return 14;
-            case 'd':
             case 'D':
                 return 13;
-            case 'c':
             case 'C':
                 return 12;
-            case 'b':
             case 'B':
                 return 11;
-            case 'a':
             case 'A':
                 return 10;
             default:
@@ -163,8 +157,16 @@ public class ConvertUtil {
         }
     }
 
+    private String decimal2Hex2(int a) {
+        String out = Integer.toHexString(a);
+        if(out.length()==1){
+            out = "0" + out;
+        }
+        return out;
+    }
+
     public static String decimal2Hex(int d){
-        String hex = "";
+        StringBuilder hex = new StringBuilder();
         List<Integer> m = new ArrayList<>();
         //1.系统方法
         //hex = Integer.toHexString(d);
@@ -177,10 +179,10 @@ public class ConvertUtil {
         }
 
         for(int i=m.size()-1; i>=0; i--){
-            hex += int2Str(m.get(i));
+            hex.append(int2Str(m.get(i)));
         }
 
-        return hex;
+        return hex.toString();
     }
 
     private static String int2Str(Integer a) {//<15
@@ -368,7 +370,7 @@ public class ConvertUtil {
     //=======================温度： 华氏 ~ 摄氏度 Fahrenheit, Centigrade=============================
     //C=（5/9）（F-32）
     public static float fahrenheit2Centigrade(float f){
-        return (5/9) * (f-32f);
+        return (5/9f) * (f-32f);
     }
 
     public static float centigrade2Fahrenheit(float c){

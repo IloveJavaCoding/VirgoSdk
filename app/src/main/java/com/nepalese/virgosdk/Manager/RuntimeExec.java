@@ -32,25 +32,14 @@ public class RuntimeExec {
     }
 
     //一般命令
-    public String executeCommand(String... command) {
-        StringBuilder builder = new StringBuilder();
+    public void executeCommand(String... command) {
         InputStream inputStream = this.executeCommandGetInputStream(command);
-        if (inputStream == null) {
-            return "";
-        } else {
-            Scanner scanner = new Scanner(inputStream);
-            while(scanner.hasNext()) {
-                builder.append(scanner.nextLine());
-                builder.append("\n");
-            }
-            scanner.close();
+        if (inputStream != null) {
             try {
                 inputStream.close();
             } catch (IOException var6) {
                 var6.printStackTrace();
             }
-
-            return builder.toString();
         }
     }
 
@@ -75,6 +64,7 @@ public class RuntimeExec {
                 if (os != null) {
                     os.close();
                 }
+                assert process != null;
                 process.destroy();
             } catch (Exception ignored) {
             }
@@ -99,6 +89,7 @@ public class RuntimeExec {
                 if (os != null) {
                     os.close();
                 }
+                assert process != null;
                 process.destroy();
             } catch (Exception ignored) {
             }

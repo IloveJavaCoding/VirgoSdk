@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author nepalese on 2020/10/30 15:20
@@ -156,9 +157,7 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
 
         //note: 若直接使用 files = getFiles(curPath);listView 将无变化
         List<File> temp = getFiles(curPath);
-        for(File f : temp){
-            files.add(f);
-        }
+        files.addAll(temp);
         adapter.notifyDataSetChanged();
     }
 
@@ -166,17 +165,13 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
     private List<File> getFiles(String path){
         if(flag==FLAG_DIR){
             FileFilter filter = File::isDirectory;//File::isDirectory
-            return Arrays.asList(new File(path).listFiles(filter));
+            return Arrays.asList(Objects.requireNonNull(new File(path).listFiles(filter)));
         }else if(flag==FLAG_FILE){//显示所有文件夹及选择的类型的文件
             switch (fileType){
                 case TYPE_ALL:
                     File[] fs = new File(path).listFiles();
-                    Arrays.sort(fs, new Comparator<File>() {
-                        @Override
-                        public int compare(File o1, File o2) {
-                            return o1.getName().compareTo(o2.getName());
-                        }
-                    });
+                    assert fs != null;
+                    Arrays.sort(fs, (o1, o2) -> o1.getName().compareTo(o2.getName()));
                     return Arrays.asList(fs);
                 case TYPE_AUDIO:
                     return getCertainFile(path, AUDIO_EXTENSION);
@@ -196,12 +191,7 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
         File[] files = new File(path).listFiles();;
 
         //排序
-        Arrays.sort(files, new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        Arrays.sort(files, (o1, o2) -> o1.getName().compareTo(o2.getName()));
 
         List extList = Arrays.asList(extension);
         for (File file:files){
@@ -297,83 +287,71 @@ public class VirgoFileSelectorDialog extends Dialog implements ListView_FileSele
     }
 
     private void setListener() {
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("click", String.valueOf(position+1));
-                //judge file/dir
-                if(files.get(position).isFile()){
-                    //do nothing
-                    //可增加本地打开查看
-                }else{
-                    //点击，进入文件夹
-                    resetData(files.get(position).getPath());
-                }
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Log.d("click", String.valueOf(position+1));
+            //judge file/dir
+            if(files.get(position).isFile()){
+                //do nothing
+                //可增加本地打开查看
+            }else{
+                //点击，进入文件夹
+                resetData(files.get(position).getPath());
             }
         });
 
-        tvConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(index.size()<1) {
-                    //未选择, 退出
-                    dismiss();
-                    return;
-                }
-
-                List<File> result = new ArrayList<>();
-                switch (flag){
-                    case FLAG_DIR://return dirs
-                        for(int i=0; i<index.size(); i++){
-                            //双重保险
-                            if(files.get(index.get(i)).isDirectory()){
-                                result.add(files.get(index.get(i)));
-                            }
-                        }
-                        break;
-                    case FLAG_FILE://return files
-                        for(int i=0; i<index.size(); i++){
-                            if(files.get(index.get(i)).isFile()){
-                                result.add(files.get(index.get(i)));
-                            }
-                        }
-                        break;
-                }
-                //通过回调函数返回结果
-                if(callback!=null){
-                    callback.onResult(result);
-                }
-                //退出
+        tvConfirm.setOnClickListener(v -> {
+            if(index.size()<1) {
+                //未选择, 退出
                 dismiss();
+                return;
             }
+
+            List<File> result = new ArrayList<>();
+            switch (flag){
+                case FLAG_DIR://return dirs
+                    for(int i=0; i<index.size(); i++){
+                        //双重保险
+                        if(files.get(index.get(i)).isDirectory()){
+                            result.add(files.get(index.get(i)));
+                        }
+                    }
+                    break;
+                case FLAG_FILE://return files
+                    for(int i=0; i<index.size(); i++){
+                        if(files.get(index.get(i)).isFile()){
+                            result.add(files.get(index.get(i)));
+                        }
+                    }
+                    break;
+            }
+            //通过回调函数返回结果
+            if(callback!=null){
+                callback.onResult(result);
+            }
+            //退出
+            dismiss();
         });
 
         //返回上一级
-        layoutLast.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //judge curPath is root or not
-                if (curPath.equals(rootPath)) {
-                    //do nothing
-                    SystemUtil.showToast(context, "已是根目录");
-                }else{
-                    //back to last layer
-                    resetData(curPath.substring(0, curPath.lastIndexOf("/")));
-                }
+        layoutLast.setOnClickListener(v -> {
+            //judge curPath is root or not
+            if (curPath.equals(rootPath)) {
+                //do nothing
+                SystemUtil.showToast(context, "已是根目录");
+            }else{
+                //back to last layer
+                resetData(curPath.substring(0, curPath.lastIndexOf("/")));
             }
         });
 
         //返回根目录
-        layoutRoot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(curPath.equals(rootPath)){
-                    //do nothing
-                    SystemUtil.showToast(context, "已是根目录");
-                }else{
-                    //back to root
-                    resetData(rootPath);
-                }
+        layoutRoot.setOnClickListener(v -> {
+            if(curPath.equals(rootPath)){
+                //do nothing
+                SystemUtil.showToast(context, "已是根目录");
+            }else{
+                //back to root
+                resetData(rootPath);
             }
         });
     }

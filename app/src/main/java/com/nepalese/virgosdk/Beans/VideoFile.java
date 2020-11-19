@@ -3,16 +3,16 @@ package com.nepalese.virgosdk.Beans;
 public class VideoFile extends BaseBean{
     private int id;
     private String name;//video name
-    private String display;
-    private String artist;
-    private String path;//local path
-    private String thumbPath;//cover path
-    private String pixel;
+    private String display;//name+后缀
+    private String artist;//
+    private String path;//存储 path
+    private String thumbPath;//缩略图 path
+    private String resolution;//分辨率
     private String album;
     private String description;
-    private long size;
-    private long date;
-    private long duration;
+    private long size;//大小
+    private long date;//最后修改日期
+    private long duration;//时长
 
     public String getDisplay() {
         return display;
@@ -78,12 +78,12 @@ public class VideoFile extends BaseBean{
         this.path = path;
     }
 
-    public String getPixel() {
-        return pixel;
+    public String getResolution() {
+        return resolution;
     }
 
-    public void setPixel(String pixel) {
-        this.pixel = pixel;
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
     }
 
     public long getSize() {

@@ -1,54 +1,34 @@
 package com.nepalese.virgosdk.Util;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.TrafficStats;
-import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.os.Environment;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresPermission;
 import androidx.core.content.ContextCompat;
 
-import com.nepalese.virgosdk.Beans.AppInfo;
-import com.nepalese.virgosdk.Beans.FlowInfo;
-import com.nepalese.virgosdk.Manager.Constants;
 import com.nepalese.virgosdk.Manager.RuntimeExec;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * @author nepalese on 2020/11/18 10:43
+ * @usage 安装包信息: 包名，版本名，版本号
+ */
 public class SystemUtil {
     //=================================system notices=====================================
     public static void showToast(Context context, String msg){

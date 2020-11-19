@@ -16,7 +16,7 @@ import com.nepalese.virgosdk.R;
 
 /**
  * @author nepalese on 2020/9/23 15:52
- * @usage
+ * @usage 各种通知
  */
 public class NotificationUtil {
     public static void sendNotification(Context context, String channelId, Intent intent, String title, String msg, int id, int iconId){

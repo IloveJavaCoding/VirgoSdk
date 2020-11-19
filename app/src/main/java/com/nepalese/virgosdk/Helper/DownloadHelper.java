@@ -16,7 +16,9 @@ import java.io.File;
 
 /**
  * @author nepalese on 2020/9/8 09:49
- * @usage
+ * @usage 文件下载器
+ * Lib: implementation 'com.lzy.net:okgo:3.0.4'
+ *      implementation 'com.lzy.net:okserver:2.0.5'
  */
 public class DownloadHelper {
     private static final String TAG = "DownloadHelper";
@@ -36,7 +38,7 @@ public class DownloadHelper {
         if (OkDownload.getInstance().hasTask(url)) {
             DownloadTask task = OkDownload.getInstance().getTask(url);
             if (task.progress.status != Progress.FINISH) {
-                Log.i(TAG, "downloadConfigZip 继续下载 = " + url);
+                Log.i(TAG, "继续下载 = " + url);
                 task.start();
             }
             return;
@@ -50,7 +52,6 @@ public class DownloadHelper {
             fileName = DateUtil.getCurTime()+getFileSuffix(fileName);
         }
 
-        Log.i(TAG, "downloadConfigZip 新的下载 = " + url);
         GetRequest<File> request = OkGo.<File>get(url);//
         // 同时下载量最大5个，核心3个，
         //这里第一个参数是tag，代表下载任务的唯一标识，传任意字符串都行，需要保证唯一,我这里用url作为了tag

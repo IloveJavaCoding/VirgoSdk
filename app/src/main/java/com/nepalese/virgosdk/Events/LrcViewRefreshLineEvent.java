@@ -1,9 +1,9 @@
 package com.nepalese.virgosdk.Events;
 
-public class RefershLrcLine {
+public class LrcViewRefreshLineEvent {
     private long time;
 
-    public RefershLrcLine(long time) {
+    public LrcViewRefreshLineEvent(long time) {
         this.time = time;
     }
 

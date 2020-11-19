@@ -68,11 +68,6 @@ public class VirgoVideoViewSurface extends SurfaceView implements MediaControlle
     private int seekWhenPrepared;//准备状态下的
     private float volume;//音量
 
-    //视频填充变量
-    private static final int[] allAspectRatio = new int[]{0, 1, 2, 3, 4, 5};
-    private int mCurrentAspectRatioIndex;
-    private int mCurrentAspectRatio;
-
     //有初始化变量
     private int curState = STATE_IDLE;//当前状态
     private int aimState = STATE_IDLE;//期望状态
@@ -165,9 +160,8 @@ public class VirgoVideoViewSurface extends SurfaceView implements MediaControlle
                     height = width * videoHeight / videoWidth;
                 }
             }
-        } else {
-            // no size yet, just adopt the given spec sizes
-        }
+        }  // no size yet, just adopt the given spec sizes
+
         Log.d(TAG, "onMeasure after: width = " + width + "\theight = " + height);
         setMeasuredDimension(width, height);
     }
@@ -364,11 +358,7 @@ public class VirgoVideoViewSurface extends SurfaceView implements MediaControlle
             mediaPlayer.setOnBufferingUpdateListener(onBufferingUpdateListener);
 
             curBufferPercentage = 0;
-            if (Build.VERSION.SDK_INT > 14) {
-                mediaPlayer.setDataSource(context, videoUri, header);
-            } else {
-                mediaPlayer.setDataSource(videoUri.toString());
-            }
+            mediaPlayer.setDataSource(context, videoUri, header);
             mediaPlayer.setDisplay(surfaceHolder);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setScreenOnWhilePlaying(true);
