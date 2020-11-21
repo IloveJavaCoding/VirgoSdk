@@ -6,7 +6,7 @@ import org.greenrobot.eventbus.EventBus;
  * @author nepalese on 2020/11/19 12:14
  * @usage 自带EventBus 注册的 activity
  */
-public class BaseEventActivity extends BaseActivity {
+public class BaseEventActivity extends BasePermissionActivity {
     public BaseEventActivity() {
     }
 
