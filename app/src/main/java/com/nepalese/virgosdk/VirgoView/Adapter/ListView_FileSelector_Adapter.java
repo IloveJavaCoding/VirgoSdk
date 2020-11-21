@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 
+import com.bumptech.glide.Glide;
 import com.nepalese.virgosdk.Beans.CheckBean;
 import com.nepalese.virgosdk.R;
 import com.nepalese.virgosdk.Util.MediaUtil;
@@ -60,7 +61,6 @@ public class ListView_FileSelector_Adapter extends BaseAdapter {
         public CheckBox checkBox;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
@@ -91,11 +91,11 @@ public class ListView_FileSelector_Adapter extends BaseAdapter {
                 case "mp3":
                 case "wav":
                 case "mp4":
-                    holder.imageView.setImageBitmap(MediaUtil.getVideoThumb(new File(path), 32, 32));
+                    holder.imageView.setImageResource(R.drawable.icon_media);
                     break;
                 case "jpg":
                 case "png":
-                    holder.imageView.setImageBitmap(MediaUtil.getImageThumb(new File(path), 32,32));
+                    Glide.with(context).load(path).into(holder.imageView);
                     break;
                 default:
                     holder.imageView.setImageResource(R.drawable.icon_file);

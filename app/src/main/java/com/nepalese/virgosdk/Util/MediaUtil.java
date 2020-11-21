@@ -40,8 +40,8 @@ import java.util.List;
 public class MediaUtil {
     private static final String TAG = "MediaUtil";
 
-    private static final int TYPE_FILE = 1;
-    private static final int TYPE_URL = 2;
+    public static final int TYPE_FILE = 1;
+    public static final int TYPE_URL = 2;
 
     //==========================================获取本地图片=========================================
     public static List<ImageFile> getImageList(Context context){
@@ -364,6 +364,7 @@ public class MediaUtil {
         long duration = -1;
         try {
             mediaPlayer.setDataSource(pathOrUrl);
+            mediaPlayer.prepare();
             duration = mediaPlayer.getDuration();
         } catch (IOException e) {
             e.printStackTrace();
@@ -386,6 +387,10 @@ public class MediaUtil {
      * 获取视频第一帧作为缩略图
      * @param pathOrUrl 本地路径或url
      * @param type 1:本地视频  2:在线视频
+     * 	retriever.getFrameAtTime(); //获取视频第一帧
+     * 	retriever.getFrameAtTime(timeUs, option); //获取指定位置的原尺寸图片 注意这里传的timeUs是微秒
+     * 	retriever.getScaledFrameAtTime(timeUs, MediaMetadataRetrieverCompat.OPTION_CLOSEST, width, height);//获取指定位置指定宽高的缩略图
+     * 	retriever.getScaledFrameAtTime(timeUs, MediaMetadataRetrieverCompat.OPTION_CLOSEST, width, height, rotate);//获取指定位置指定宽高并且旋转的缩略图
      */
     public static Bitmap getVideoThumb(Context context, String pathOrUrl, int type) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
@@ -399,6 +404,7 @@ public class MediaUtil {
 
         return retriever.getFrameAtTime();
     }
+
 
     /**
      * 获取视频的缩略图--可指定大小
@@ -420,6 +426,11 @@ public class MediaUtil {
             bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
         }
         return bitmap;
+    }
+
+    public static Bitmap getVideoThumb(String videoPath, int kind) {
+        //調用ThumbnailUtils類的靜態方法createVideoThumbnail獲取視頻的截圖；
+        return ThumbnailUtils.createVideoThumbnail(videoPath, kind);
     }
 
     @RequiresApi(29)

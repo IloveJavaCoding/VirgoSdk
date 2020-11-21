@@ -1,5 +1,6 @@
 package com.nepalese.virgosdk.Util;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +38,7 @@ public class SystemUtil {
     //重启应用
     public static void restartApp(Context context) {
         final Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);//Intent.FLAG_ACTIVITY_CLEAR_TASK;
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
     }
 
@@ -45,6 +46,14 @@ public class SystemUtil {
     public static void reBoot(){
         String cmd = "reboot";
         RuntimeExec.getInstance().executeCommand(cmd);
+    }
+
+
+    //重启activity
+    private void recreate(Activity activity){
+        activity.finish();
+        Intent intent = new Intent(activity, activity.getClass());
+        activity.startActivity(intent);
     }
 
     //======================================permission check========================================
