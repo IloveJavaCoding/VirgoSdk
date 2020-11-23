@@ -40,7 +40,6 @@ public class VirgoDelIconEditText extends androidx.appcompat.widget.AppCompatEdi
                 SetDrawable();
             }
         });
-
     }
 
     private void SetDrawable() {

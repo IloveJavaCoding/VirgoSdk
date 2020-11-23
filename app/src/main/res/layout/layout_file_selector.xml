@@ -84,8 +84,8 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:padding="@dimen/padding_3"
-                app:srcCompat="@drawable/ic_file_back"
-                tools:ignore="VectorDrawableCompat" />
+                android:src="@mipmap/icon_back"
+                android:scaleType="centerInside"/>
 
             <TextView
                 android:layout_width="wrap_content"

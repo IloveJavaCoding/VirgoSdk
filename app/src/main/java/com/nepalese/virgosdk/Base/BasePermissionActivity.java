@@ -4,16 +4,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.view.KeyEvent;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.nepalese.virgosdk.R;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +17,7 @@ import java.util.List;
  * @author nepalese on 2020/11/19 12:16
  * @usage 带一些常用配置的activity
  */
-public class BasePermissionActivity extends AppCompatActivity {
+public class BasePermissionActivity extends BaseActivity {
     private static final int PERMISSION_REQUEST_CODE = 0x00;
     protected String[] mNeedPermissions;
     private boolean isNeedCheck = true;
@@ -33,18 +28,6 @@ public class BasePermissionActivity extends AppCompatActivity {
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
         this.setNeedPermissions();
-    }
-
-    protected void postEvent(Object event) {
-        EventBus.getDefault().post(event);
-    }
-
-    public void showToast(String msg){
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    public void showLongToast(String msg){
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
     protected void setNeedPermissions() {
@@ -66,11 +49,8 @@ public class BasePermissionActivity extends AppCompatActivity {
 
     private List<String> findDeniedPermissions(String[] permissions) {
         List<String> needRequestPermissionList = new ArrayList();
-        String[] var3 = permissions;
-        int var4 = permissions.length;
 
-        for(int var5 = 0; var5 < var4; ++var5) {
-            String perm = var3[var5];
+        for (String perm : permissions) {
             if (ContextCompat.checkSelfPermission(this, perm) != 0 || ActivityCompat.shouldShowRequestPermissionRationale(this, perm)) {
                 needRequestPermissionList.add(perm);
             }
@@ -80,10 +60,7 @@ public class BasePermissionActivity extends AppCompatActivity {
     }
 
     private boolean verifyPermissions(int[] grantResults) {
-        int var3 = grantResults.length;
-
-        for(int var4 = 0; var4 < var3; ++var4) {
-            int result = grantResults[var4];
+        for (int result : grantResults) {
             if (result != 0) {
                 return false;
             }
@@ -94,14 +71,14 @@ public class BasePermissionActivity extends AppCompatActivity {
 
     private void showMissingPermissionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(this.getString(R.string.alert));
-        builder.setMessage(this.getString(R.string.permission_warn));
-        builder.setNegativeButton(this.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+        builder.setTitle("提示");
+        builder.setMessage("缺少权限");
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 BasePermissionActivity.this.finish();
             }
         });
-        builder.setPositiveButton(this.getString(R.string.setting), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("设置", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 BasePermissionActivity.this.startAppSettings();
                 BasePermissionActivity.this.isNeedCheck = true;
@@ -122,27 +99,6 @@ public class BasePermissionActivity extends AppCompatActivity {
         if (this.isNeedCheck) {
             this.checkPermissions(this.mNeedPermissions);
         }
-    }
-
-    protected void onPause() {
-        super.onPause();
-    }
-
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == 4) {
-            this.back();
-            return true;
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
-    }
-
-    protected void back() {
-        this.finish();
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] paramArrayOfInt) {

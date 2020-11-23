@@ -5,6 +5,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.greenrobot.eventbus.EventBus;
+
 /**
  * @author nepalese on 2020/11/21 12:07
  * @usage
@@ -15,6 +17,10 @@ public class BaseActivity extends AppCompatActivity {
 
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
+    }
+
+    public void postEvent(Object obj){
+        EventBus.getDefault().post(obj);
     }
 
     public void showToast(String msg){

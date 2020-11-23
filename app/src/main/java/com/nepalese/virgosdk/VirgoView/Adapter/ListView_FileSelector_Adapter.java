@@ -82,8 +82,9 @@ public class ListView_FileSelector_Adapter extends BaseAdapter {
 
         String path = data.get(position).getPath();
         holder.tvData.setText(path.substring(path.lastIndexOf("/")+1));//show the last layer
+
         if(data.get(position).isDirectory()){
-            holder.imageView.setImageResource(R.drawable.icon_dir);
+            holder.imageView.setImageResource(R.mipmap.icon_dir);
         }else{
             //file
             String tail = path.substring(path.lastIndexOf(".")+1);
@@ -91,14 +92,14 @@ public class ListView_FileSelector_Adapter extends BaseAdapter {
                 case "mp3":
                 case "wav":
                 case "mp4":
-                    holder.imageView.setImageResource(R.drawable.icon_media);
+                    holder.imageView.setImageResource(R.mipmap.icon_media);
                     break;
                 case "jpg":
                 case "png":
                     Glide.with(context).load(path).into(holder.imageView);
                     break;
                 default:
-                    holder.imageView.setImageResource(R.drawable.icon_file);
+                    holder.imageView.setImageResource(R.mipmap.icon_file);
                     break;
             }
         }

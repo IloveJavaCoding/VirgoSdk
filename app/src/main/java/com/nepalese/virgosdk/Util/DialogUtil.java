@@ -8,8 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 
-import com.nepalese.virgosdk.R;
-
 import java.util.Calendar;
 
 /**
@@ -23,8 +21,8 @@ public class DialogUtil {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         return builder.setTitle(title)
                 .setMessage(message)
-                .setNegativeButton(R.string.cancel,listener)
-                .setPositiveButton(R.string.confirm,listener)
+                .setNegativeButton("cancel",listener)
+                .setPositiveButton("confirm",listener)
                 .show();
     }
 
@@ -40,7 +38,7 @@ public class DialogUtil {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title)
                 .setItems(items, listener)
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -52,8 +50,8 @@ public class DialogUtil {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         return builder.setTitle(title)
                 .setView(view)
-                .setNegativeButton(R.string.cancel,listener)
-                .setPositiveButton(R.string.confirm,listener)
+                .setNegativeButton("cancel",listener)
+                .setPositiveButton("confirm",listener)
                 .show();
     }
 
@@ -61,7 +59,7 @@ public class DialogUtil {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         return builder.setTitle(title)
                 .setView(view)
-                .setNegativeButton(R.string.cancel,listener)
+                .setNegativeButton("cancel",listener)
                 .show();
     }
 

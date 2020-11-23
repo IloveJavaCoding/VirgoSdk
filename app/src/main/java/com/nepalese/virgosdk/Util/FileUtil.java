@@ -88,7 +88,7 @@ public class FileUtil {
         if(file.list().length>0){
             for(File f : file.listFiles()){
                 if(f.isFile()){
-                   return f.delete();//delete all files
+                    f.delete();//delete all files
                 }else if(f.isDirectory()){
                     deleteDirWithFile(f);
                 }
@@ -267,6 +267,30 @@ public class FileUtil {
         return null;
     }
 
+    public static void readerWriterStream(InputStream input, FileOutputStream output) {
+        byte[] buffer = new byte[1024];
+        try {
+            while (true) {
+                int length;
+                if ((length = input.read(buffer)) == -1) {
+                    break;
+                }
+                output.write(buffer, 0, length);
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            try {
+                input.close();
+                output.flush();
+                output.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 
     //============================================copy/move file====================================
     public static void copyFile(String src, String dest){
