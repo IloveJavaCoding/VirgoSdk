@@ -21,7 +21,6 @@ import java.util.Set;
  * @usage SharedPreference 基础配置
  */
 public class SPUtil {
-
     private static SharedPreferences getShared(Context context, String fileName){
         return context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
     }

@@ -3,6 +3,7 @@ package com.nepalese.virgosdk.Util;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
+import android.text.TextUtils;
 
 import com.nepalese.virgosdk.Manager.RuntimeExec;
 
@@ -47,6 +48,26 @@ public class FileUtil {
         return context.getFilesDir().getAbsolutePath();
     }
 
+    /**
+     * 提取文件名的后缀
+     * @param fileName
+     * @return 如：.jpg, .png .mp3 ...
+     */
+    public static String getFileSuffix(String fileName){
+        if(TextUtils.isEmpty(fileName)){
+            return null;
+        }
+
+        return fileName.substring(fileName.lastIndexOf("."));
+    }
+
+    public static String getName4Url(String url){
+        if(TextUtils.isEmpty(url)){
+            return null;
+        }
+
+        return url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf(".") );
+    }
 
     //=====================================create file/dir==========================================
     public static boolean createFile(String path, String fileName){
