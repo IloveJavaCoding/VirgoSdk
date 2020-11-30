@@ -1,4 +1,4 @@
-package com.nepalese.virgosdk.VirgoView;
+package com.nepalese.virgosdk.VirgoView.NeedRID;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -8,21 +8,27 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
-import com.nepalese.virgosdk.R;
-
+//
 public class VirgoDelIconEditText extends androidx.appcompat.widget.AppCompatEditText {
-    private Context context;
     private Drawable icon;
 
+    public VirgoDelIconEditText(Context context) {
+        this(context, null);
+    }
+
     public VirgoDelIconEditText(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        this.context = context;
+        this(context, attrs,0);
+    }
+
+    public VirgoDelIconEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        //set delete icon;
         Init();
     }
 
     private void Init() {
-        //set delete icon;
-        icon = context.getResources().getDrawable(R.drawable.ic_del_icon);
+//        this.icon = getResources().getDrawable(R.drawable.ic_del_icon);
+
         //set text change listener;
         addTextChangedListener(new TextWatcher() {
             @Override

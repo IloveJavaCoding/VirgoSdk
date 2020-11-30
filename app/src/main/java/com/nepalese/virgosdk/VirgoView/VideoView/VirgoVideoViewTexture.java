@@ -320,10 +320,12 @@ public class VirgoVideoViewTexture extends TextureView implements MediaControlle
     }
 
     private void setControllerVisibility() {
-        if (mediaController.isShowing()) {
-            mediaController.hide();
-        } else {
-            mediaController.show();
+        if(mediaController!=null){
+            if (mediaController.isShowing()) {
+                mediaController.hide();
+            } else {
+                mediaController.show();
+            }
         }
     }
 

@@ -20,8 +20,10 @@ public class ApkInfoUtil {
 
     private static volatile ApkInfoUtil instance;
     private final PackageManager packageManager;
+    private Context context;
 
     private ApkInfoUtil(Context context) {
+        this.context = context;
         this.packageManager = context.getPackageManager();
     }
 
@@ -41,12 +43,12 @@ public class ApkInfoUtil {
         return context.getPackageName();
     }
 
-    public String getSelfVersionName(Context context){
+    public String getSelfVersionName(){
         return  getPackageInfo(getSelfPackageName(context)).versionName;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.P)
-    public long  getSelfVersionCode(Context context){
+    public long  getSelfVersionCode(){
         return getPackageInfo(getSelfPackageName(context)).getLongVersionCode();
     }
 

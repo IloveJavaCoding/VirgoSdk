@@ -1,4 +1,4 @@
-package com.nepalese.virgosdk.VirgoView;
+package com.nepalese.virgosdk.VirgoView.NeedRID;
 
 import android.app.Dialog;
 import android.content.Context;

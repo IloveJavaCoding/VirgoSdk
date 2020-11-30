@@ -8,8 +8,6 @@ import android.net.Uri;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.nepalese.virgosdk.R;
-
 import java.util.ArrayList;
 import java.util.List;
 

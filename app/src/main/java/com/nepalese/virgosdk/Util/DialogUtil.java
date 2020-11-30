@@ -6,7 +6,10 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
+import android.widget.TextView;
 
 import java.util.Calendar;
 
@@ -102,4 +105,18 @@ public class DialogUtil {
                 , true)
                 .show();
     }
+
+    //======================================================================================
+//    public Dialog getLoadingDialog(Context context, String content) {
+//        Dialog dialog = new Dialog(context);
+//        dialog.setContentView(layout.layout_loading);
+//        dialog.setCanceledOnTouchOutside(false);
+//        Window window = dialog.getWindow();
+//        TextView tvTitle = (TextView)window.findViewById(id.tvLoading);
+//        if (!TextUtils.isEmpty(content)) {
+//            tvTitle.setText(content);
+//        }
+//
+//        return dialog;
+//    }
 }

@@ -22,7 +22,7 @@ public class MathUtil {
         return bd.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
-    public static String setNumberScale2(double value, int scale) {
+    public static String setNumberScale(float value, int scale) {
         String format = "%." + scale + "f";
         return String .format(format, value);
     }
