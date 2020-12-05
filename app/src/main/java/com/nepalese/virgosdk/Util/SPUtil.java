@@ -92,7 +92,7 @@ public class SPUtil {
         editor.apply();
     }
 
-    private static void saveObject(Context context, String fileName, String key, Object objValue) {
+    public static void saveObject(Context context, String fileName, String key, Object objValue) {
         SharedPreferences sp = getShared(context, fileName);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream out = null;
@@ -116,7 +116,7 @@ public class SPUtil {
         }
     }
 
-    private static <T> T getObject(Context context, String fileName, String key, Class<T> clazz) {
+    public static <T> T getObject(Context context, String fileName, String key, Class<T> clazz) {
         SharedPreferences sp = getShared(context, fileName);
         if (sp.contains(key)) {
             String objectVal = sp.getString(key, null);
@@ -140,5 +140,4 @@ public class SPUtil {
         }
         return null;
     }
-
 }

@@ -1,5 +1,6 @@
 package com.nepalese.virgosdk.Helper;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -20,12 +21,13 @@ public class ApkUpgradeHelper {
     }
 
     //需手动授权
-    public static void installApkManual(Context context, File file) {
-        Uri uri = Uri.fromFile(file);
-        Intent intent = new Intent("android.intent.action.VIEW");
+    public static void installApkManual(Activity activity, File file, int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);//"android.intent.action.VIEW"
+        intent.setDataAndType(Uri.fromFile(file),"application/vnd.android.package-archive");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.setDataAndType(uri, "application/vnd.android.package-archive");
-        context.startActivity(intent);
+        activity.startActivityForResult(intent, requestCode);//处理取消安装
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 }
