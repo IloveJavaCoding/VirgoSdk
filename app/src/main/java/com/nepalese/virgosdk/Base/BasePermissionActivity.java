@@ -16,7 +16,7 @@ import java.util.List;
  * @usage 带一些常用配置的activity
  */
 public class BasePermissionActivity extends BaseActivity {
-    private static final int PERMISSION_REQUEST_CODE = 0x00;
+    private static final int PERMISSION_REQUEST_CODE = 0x01;
     protected String[] mNeedPermissions;
     private boolean isNeedCheck = true;
 

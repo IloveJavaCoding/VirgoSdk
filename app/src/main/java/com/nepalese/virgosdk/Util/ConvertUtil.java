@@ -342,6 +342,14 @@ public class ConvertUtil {
         }
     }
 
+    //两位补全
+    public static String completeTime(int time){
+        if(time>9){
+            return String.valueOf(time);
+        }else {
+            return "0" + time;
+        }
+    }
 
     //====================================== 显示单位转换============================================
     //dp = px / density; --> px = dp * density = dp * (dpi / 160)

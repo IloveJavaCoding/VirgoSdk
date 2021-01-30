@@ -9,6 +9,7 @@ import com.nepalese.virgosdk.Manager.RuntimeExec;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author nepalese on 2020/10/18 10:40
@@ -278,7 +280,6 @@ public class FileUtil {
                 output.write(buffer, 0, length);
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
             try {
@@ -286,10 +287,43 @@ public class FileUtil {
                 output.flush();
                 output.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
+    }
+
+    //将输入流转换为字符串
+    public static String parseStream2Str(InputStream inStream, String format){
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+
+        while (true) {
+            int len;
+            try {
+                if ((len = inStream.read(buffer)) == -1) break;
+                outputStream.write(buffer, 0, len);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if(inStream!=null){
+            try {
+                inStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        byte[] data = outputStream.toByteArray();
+
+        String out = null;
+        try {
+            out = new String(data, format);//StandardCharsets.UTF_8
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return out;
     }
 
     //============================================copy/move file====================================
@@ -349,7 +383,6 @@ public class FileUtil {
         copyFile(src, dest);
         deleteFile(src);
     }
-
 
     //==================================文件编码类型：gbk ? utf-8=========================
     public static Boolean isUtf8(File file) {

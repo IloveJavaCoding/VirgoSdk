@@ -3,6 +3,7 @@ package com.nepalese.virgosdk.Util;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -43,6 +44,17 @@ public class ScreenUtil {
                 RuntimeExec.getInstance().executeCommand("reboot");
                 break;
         }
+    }
+
+    //////////////////////////////////////////////////沉浸式//////////////////////////////////////////
+    public static void setImmersionLayout(Activity activity) {
+        View decorView = activity.getWindow().getDecorView();
+        int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+        decorView.setSystemUiVisibility(option);
+        activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
+        activity.getWindow().setNavigationBarColor(Color.TRANSPARENT);
     }
 
     //=========================================截屏==================================================

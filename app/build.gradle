@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 
+def version = "1.1.1"
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.1"
@@ -9,7 +10,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        versionName version
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -24,14 +25,14 @@ android {
     android{
         task makeJar(type: Copy) {
             //删除存在的
-            delete 'src/main/libs/VirgoSDK.jar'
+            //delete 'src/main/libs/VirgoSDK.jar'
             //生成jar的文件路径可能会有不同（在build/intermediates下面）
             from('build/intermediates/aar_main_jar/release')
             //打进jar包后的文件目录
             into('src/main/libs/')
             include('classes.jar')
             //重命名
-            rename ('classes.jar', 'VirgoSDK.jar')
+            rename ('classes.jar', "VirgoSDK_${version}.jar")
         }
 
         makeJar.dependsOn(build)

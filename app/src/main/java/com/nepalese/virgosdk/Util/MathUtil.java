@@ -1,6 +1,8 @@
 package com.nepalese.virgosdk.Util;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author nepalese on 2020/11/18 11:30
@@ -8,12 +10,39 @@ import java.math.BigDecimal;
  */
 public class MathUtil {
     //get random number
-    public static double getRandomNum(double a, double b) {
+    public static double getRandomDouble(double a, double b) {
         return (Math.random() * (b - a)) + a;
     }
 
-    public static int getRandomNumInt(int a, int b) {
+    public static int getRandomInt(int a, int b) {
         return (int) (Math.random() * (b - a)) + a;
+    }
+
+    //在指定范围内获取指定个数随机数：int
+    public static List<Integer> getCountRandom(int min, int max, int num){
+        if(num>(max-min))
+            return null;
+
+        if(num<1)
+            return null;
+
+        List<Integer> out  = new ArrayList<>();
+        do {
+            int random = getRandomInt(min, max);
+            boolean hasExist = false;
+            for (int i : out) {
+                if (random == i) {
+                    hasExist = true;
+                    break;
+                }
+            }
+
+            if (!hasExist) {
+                out.add(random);
+            }
+
+        } while (out.size() < num);
+        return out;
     }
 
     //设置精度

@@ -27,6 +27,12 @@ import java.util.Map;
  * @usage 系统管理：重启应用、系统，设置系统时间
  */
 public class SystemUtil {
+    //仅跳转activity
+    public static void jumActivity(Context context, Class c){
+        Intent intent = new Intent(context, c);
+        context.startActivity(intent);
+    }
+
     public static void showToast(Context context, String msg){
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
     }

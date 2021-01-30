@@ -1,5 +1,6 @@
 package com.nepalese.virgosdk.Base;
 
+import android.app.ProgressDialog;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -12,11 +13,28 @@ import org.greenrobot.eventbus.EventBus;
  * @usage
  */
 public class BaseActivity extends AppCompatActivity {
+    private ProgressDialog dialog;
+
     public BaseActivity() {
+
     }
 
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
+    }
+
+    public void showDialog(String title, String content){
+        dialog = new ProgressDialog(this);
+        dialog.setTitle(title);
+        dialog.setMessage(content);
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    public void hideDialog(){
+        if(dialog!=null){
+            dialog.dismiss();
+        }
     }
 
     public void postEvent(Object obj){
@@ -40,7 +58,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == 4) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             this.back();
             return true;
         } else {

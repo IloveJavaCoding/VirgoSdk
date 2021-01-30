@@ -15,12 +15,14 @@ import java.util.Map;
  * Lib： gson-2.7.jar
  */
 public class JsonUtil {
+
+    //自定义类内属性名与json字段名一致
     public static Object getObject(String json, Type class1) {
         try {
             Gson gson = (new GsonBuilder()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             return gson.fromJson(json.trim(), class1);
-        } catch (Exception var4) {
-            var4.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -29,7 +31,7 @@ public class JsonUtil {
         try {
             Gson gson = (new GsonBuilder()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
             return gson.toJson(object);
-        } catch (Exception var2) {
+        } catch (Exception e) {
             return "";
         }
     }
@@ -52,5 +54,24 @@ public class JsonUtil {
 
     public static String string2Json(Map<?, ?> string_map) {
         return (new Gson()).toJson(string_map);
+    }
+
+    public static Object getResponeValue(String json, String key) {
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            return jsonObject.get(key);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public static String getResponeValue(String json, String contentKey, String key) {
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            String returnObject = jsonObject.getString(contentKey);
+            return (new JSONObject(returnObject)).getString(key);
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
