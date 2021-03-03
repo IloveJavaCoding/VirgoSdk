@@ -22,7 +22,11 @@ import java.net.URL;
 public class InternetUtil {
     private static final String TAG = "InternetUtil";
 
-    //从有效图片URL连接获取数据流，解析为bitmap便于显示
+    /**
+     * 从有效图片URL连接获取数据流，解析为bitmap便于显示
+     * @param imgUrl
+     * @return bitmap
+     */
     public static Bitmap getBitmapFromUrl(String imgUrl){
         Bitmap bitmap = null;
         try {
@@ -37,13 +41,23 @@ public class InternetUtil {
         return bitmap;
     }
 
-    //将图片url先解析成bitmap, 然后保存到本地
+    /**
+     * 将图片url先解析成bitmap, 然后保存到本地
+     * @param imgUrl
+     * @param path
+     * @param fileName
+     */
     public static void downloadImgFromUrl(String imgUrl, String path, String fileName) {
         Bitmap bitmap = getBitmapFromUrl((imgUrl));
         BitmapUtil.saveBitmap2File(bitmap, path, fileName);
     }
 
-    //从有效资源文件url下载资源到本地（类型不限）
+    /**
+     * 从有效资源文件url下载资源到本地（类型不限）
+     * @param strUrl
+     * @param path
+     * @param fileName
+     */
     public static void downloadFile(String strUrl, String path, String fileName) {
         File file = new File(path+File.separator+fileName);
 

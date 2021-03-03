@@ -39,10 +39,20 @@ public class ApkInfoUtil {
     }
 
     //=============================获取当前安装包包名，版本名，版本号=================================
+
+    /**
+     * 获取当前应用安装包名
+     * @param context
+     * @return
+     */
     public static String getSelfPackageName(Context context){
         return context.getPackageName();
     }
 
+    /**
+     * 获取当前应用版本号
+     * @return
+     */
     public String getSelfVersionName(){
         return  getPackageInfo(getSelfPackageName(context)).versionName;
     }
@@ -53,7 +63,11 @@ public class ApkInfoUtil {
     }
 
     //==========================================通用信息=============================================
-    //获取安装包（已安装在该系统）相关信息
+    /**
+     * 获取安装包（已安装在该系统）相关信息
+     * @param packageName
+     * @return PackageInfo
+     */
     public PackageInfo getPackageInfo(String packageName){
         PackageInfo packageInfo = null;
         try {
@@ -70,28 +84,47 @@ public class ApkInfoUtil {
         return packageManager.getPackageArchiveInfo(packagePath, PackageManager.GET_ACTIVITIES);
     }
 
-    //获取APP信息类
+    /**
+     * 获取APP信息类
+     * @param pkgInfo
+     * @return ApplicationInfo
+     */
     public ApplicationInfo getAppInfo(PackageInfo pkgInfo){
         return pkgInfo.applicationInfo;
     }
 
-    //获取APP UID
+    /**
+     * 获取APP UID
+     * @param packageName
+     * @return
+     */
     public int getAppUid(String packageName){
         return getPackageInfo(packageName).applicationInfo.uid;
     }
 
-    //获取APP名称
+    /**
+     * 获取APP名称
+     * @param applicationInfo
+     * @return
+     */
     public String getAppName(ApplicationInfo applicationInfo){
         return packageManager.getApplicationLabel(applicationInfo).toString();
     }
 
-    //获取APP图标
+    /**
+     * 获取APP图标
+     * @param applicationInfo
+     * @return
+     */
     public Drawable getAppIcon(ApplicationInfo applicationInfo){
         return packageManager.getApplicationIcon(applicationInfo);
     }
 
-    //获取apk包的信息：版本号，名称，图标等
-    //AppInfo：(自定义类）
+    /**
+     * 获取apk包的信息：版本号，名称，图标等
+     * @param pkgInfo
+     * @return AppInfo：(自定义类）
+     */
     public AppInfo getApkInfo(PackageInfo pkgInfo){
         if (pkgInfo != null) {
             ApplicationInfo appInfo = pkgInfo.applicationInfo;

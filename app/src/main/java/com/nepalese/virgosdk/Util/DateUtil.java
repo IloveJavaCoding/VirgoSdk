@@ -21,10 +21,22 @@ public class DateUtil {
     public static final String DATE_FORMAT_YEAR = "yyyy";
 
     //=============================================格式转换==========================================
+    /**
+     * date 转 字符形式
+     * @param date
+     * @param format
+     * @return
+     */
     public static String date2String(Date date, String format){
         return new SimpleDateFormat(format, Locale.CHINA).format(date);
     }
 
+    /**
+     * 字符 转 date
+     * @param time
+     * @param format
+     * @return
+     */
     public static Date string2Date(String time, String format){
         SimpleDateFormat dateFormat = new SimpleDateFormat(format, Locale.CHINA);
         Date date = null;
@@ -36,22 +48,49 @@ public class DateUtil {
         return date;
     }
 
+    /**
+     * 时间戳 转 字符
+     * @param time
+     * @param format
+     * @return
+     */
     public static String long2String(long time, String format){
         Date date = new Date(time);
         return date2String(date, format);
     }
 
     //============================================获取时间===========================================
+    /**
+     * 当前时间
+     * @return date
+     */
     public static Date getCurTime(){
         return Calendar.getInstance().getTime();
     }
 
+    /**
+     * 当前时间
+     * @return 时间戳
+     */
     public static long getCurTime2(){
         return System.currentTimeMillis();
     }
 
+    /**
+     * 当前时间
+     * @param format
+     * @return string
+     */
+    public static String getCurTime(String format){
+        return date2String(getCurTime(), format);
+    }
+
     //==========================================简单计算============================================
-    //基于生日日期获取年龄
+    /**
+     * 基于生日日期获取年龄
+     * @param birth
+     * @return
+     */
     public static int getAge(Date birth){
         Calendar calendar = Calendar.getInstance();
         //当前年份
@@ -61,7 +100,11 @@ public class DateUtil {
         return year - year1;
     }
 
-    //提取一个日期里的年月日，时分秒,星期
+    /**
+     * 提取一个日期里的年月日，时分秒,星期
+     * @param date
+     * @return int[] = {年,月,日,时,分,秒,星期}
+     */
     public static int[] getSeparateDate(Date date) {
         int[] arr = new int[7];
         Calendar calendar = Calendar.getInstance();

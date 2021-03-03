@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * @author nepalese on 2020/11/18 09:40
- * @usage 生成，扫描二维码
+ * @usage 生成二维码
  * lib: implementation 'com.google.zxing:core:3.2.1'
  */
 public class QRCHelper {
@@ -130,6 +130,4 @@ public class QRCHelper {
 
         return bitmap;
     }
-
-    
 }

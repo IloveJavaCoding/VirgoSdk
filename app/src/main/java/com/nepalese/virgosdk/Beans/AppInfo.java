@@ -4,7 +4,7 @@ import android.graphics.drawable.Drawable;
 
 /**
  * @author nepalese on 2020/9/25 14:00
- * @usage
+ * @usage APP基本信息类
  */
 public class AppInfo extends BaseBean {
     private String name;

@@ -76,7 +76,6 @@ public class ConvertUtil {
         return retVal;
     }
 
-
     //=======================================字符串<-->十六进制======================================
     //字符串转换为16进制字符串
     public static String string2Hex(String str){

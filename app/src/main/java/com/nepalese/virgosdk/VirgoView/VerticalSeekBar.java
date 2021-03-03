@@ -6,6 +6,10 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 
+/**
+ * @author nepalese on 2020/11/19 10:43
+ * @usage 竖向的seekbar
+ */
 public class VerticalSeekBar extends androidx.appcompat.widget.AppCompatSeekBar {
     private static final String TAG = "VirgoVerticalSeekBar";
 
@@ -24,8 +28,8 @@ public class VerticalSeekBar extends androidx.appcompat.widget.AppCompatSeekBar 
         super(context, attrs, defStyle);
     }
 
-    public void setOnVerticalSeekBarChangeListener(OnVerticalSeekBarChangeListener l){
-        listener = l;
+    public void setOnVerticalSeekBarChangeListener(OnVerticalSeekBarChangeListener listener){
+        this.listener = listener;
     }
 
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -38,12 +42,12 @@ public class VerticalSeekBar extends androidx.appcompat.widget.AppCompatSeekBar 
         setMeasuredDimension(getMeasuredHeight(), getMeasuredWidth());
     }
 
-    protected void onDraw(Canvas c) {
+    protected void onDraw(Canvas canvas) {
         //将SeekBar转转90度
-        c.rotate(-90);
+        canvas.rotate(-90);
         //将旋转后的视图移动回来
-        c.translate(-getHeight(),0);
-        super.onDraw(c);
+        canvas.translate(-getHeight(),0);
+        super.onDraw(canvas);
     }
 
     @Override

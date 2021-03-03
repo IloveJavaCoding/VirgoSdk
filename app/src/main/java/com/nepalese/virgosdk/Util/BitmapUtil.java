@@ -50,19 +50,30 @@ public class BitmapUtil {
 
     //====================================bitmap 数据类型转换========================================
     //drawable <--> Bitmap
+    /**
+     * bitmap 转 drawable
+     * @param context
+     * @param bmp
+     * @return drawable
+     */
     public static Drawable bitmap2Drawable(Context context, Bitmap bmp) {
         return new BitmapDrawable(context.getResources(), bmp); //BitmapDrawable(bmp) 已被弃用
     }
 
+    /**
+     * drawable 转 bitmap
+     * @param drawable
+     * @return bitmap
+     */
     public static Bitmap drawable2Bitmap(Drawable drawable) {
+        if(drawable==null){
+            return null;
+        }
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
             return bitmapDrawable.getBitmap();
         }
-        return null;
-    }
 
-    public static Bitmap drawable2Bitmap2(Drawable drawable) {
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(),
                 drawable.getAlpha() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(bitmap);
@@ -73,6 +84,11 @@ public class BitmapUtil {
     }
 
     //byte[] <--> Bitmap
+    /**
+     * 将bitmap 转成 byte[]
+     * @param bitmap
+     * @return
+     */
     public static byte[] bitmap2Bytes(Bitmap bitmap) {
         if (bitmap == null) return new byte[0];
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -89,6 +105,11 @@ public class BitmapUtil {
         return bytes;
     }
 
+    /**
+     * byte[] 转 bitmap
+     * @param bytes byte[]
+     * @return bitmap
+     */
     public static Bitmap bytes2Bitmap(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -97,6 +118,12 @@ public class BitmapUtil {
     }
 
     //string <--> bitmap
+
+    /**
+     * bitmap 转 string
+     * @param bitmap
+     * @return string
+     */
     public static String bitmap2String(Bitmap bitmap){
         if (bitmap == null) return null;
 
@@ -104,21 +131,37 @@ public class BitmapUtil {
         return Base64.encodeToString(bytes, Base64.DEFAULT);
     }
 
+    /**
+     * string 转 bitmap
+     * @param data Base64 string
+     * @return
+     */
     public static Bitmap string2Bitmap(String data){
         byte[] bytes = Base64.decode(data, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(bytes,0, bytes.length);
     }
 
     //======================================bitmap 获取=============================================
-    //从资源文件中获取bitmap
+    /**
+     * 从资源文件中获取bitmap
+     * @param context
+     * @param id
+     * @return bitmap
+     */
     public static Bitmap getBitmapFromRes(Context context, int id){
         return BitmapFactory.decodeResource(context.getResources(), id);
     }
 
-    public static Bitmap[] getBitmapsFromRes(Context context, int[] id){
-        Bitmap[] bitmaps = new Bitmap[id.length];
-        for(int i=0; i<id.length; i++){
-            bitmaps[i] = BitmapFactory.decodeResource(context.getResources(), id[i]);
+    /**
+     * 从资源文件中获取多个bitmap
+     * @param context
+     * @param ids int[] 资源文件id 数组
+     * @return Bitmap[]
+     */
+    public static Bitmap[] getBitmapsFromRes(Context context, int[] ids){
+        Bitmap[] bitmaps = new Bitmap[ids.length];
+        for(int i=0; i<ids.length; i++){
+            bitmaps[i] = BitmapFactory.decodeResource(context.getResources(), ids[i]);
         }
         return bitmaps;
     }
@@ -296,7 +339,11 @@ public class BitmapUtil {
         return aimBm;
     }
 
-    // 裁剪正方形图片(以长宽中小的为边长）
+    /**
+     * 裁剪正方形图片(以长宽中小的为新边长）
+     * @param bitmap
+     * @return
+     */
     public static Bitmap cutBitmap(Bitmap bitmap){
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
@@ -324,7 +371,7 @@ public class BitmapUtil {
     }
 
     /**
-     * 裁切图片
+     * 裁切图片：指定裁剪位置
      * @param bitmap
      * @param left
      * @param top
@@ -368,7 +415,7 @@ public class BitmapUtil {
     }
 
     /**
-     * 缩放
+     * 伸缩图片
      * @param bitmap
      * @param aimW 想要的宽度
      * @param amiH 想要的高度
@@ -402,6 +449,12 @@ public class BitmapUtil {
         return aimBm;
     }
 
+    /**
+     * 伸缩图片
+     * @param bitmap
+     * @param scale 缩放比例
+     * @return
+     */
     public static Bitmap scaleBitmap(Bitmap bitmap, float scale){
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
@@ -689,7 +742,6 @@ public class BitmapUtil {
         return bitmap;
     }
 
-
     //==========================================other===============================================
     /**
      * 设置图片效果，根据色调，饱和度，亮度来调节图片效果, 会创建新图
@@ -735,8 +787,8 @@ public class BitmapUtil {
      * 合并两个Bitmap
      * @param backBitmap
      * @param frontBitmap
-     * @param width
-     * @param height
+     * @param width 合成后图的宽
+     * @param height 合成后图的高
      * @return
      */
     public static Bitmap mergeBitmap(Bitmap backBitmap, Bitmap frontBitmap, int width, int height) {
@@ -760,10 +812,11 @@ public class BitmapUtil {
 
     /**
      * 读取图片文件的类型，仅图片文件！！！
-     * @param file 图片文件
+     * @param file
+     * @return String; null -> 未知？文件不存在
      */
     public static String readBitmapType(File file) {
-        String type = "image/jpeg";
+        String type = null;
         if (file.exists()) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;// 只读边,不读内容

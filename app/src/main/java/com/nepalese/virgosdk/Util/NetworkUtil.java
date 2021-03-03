@@ -50,10 +50,8 @@ public class NetworkUtil {
         }
 
         // 判断是不是连接的是不是有线网
-        if (activeNetInfo!=null){
-            if(activeNetInfo.getType()==ConnectivityManager.TYPE_ETHERNET){
-                return NETWORK_INTERNET;
-            }
+        if(activeNetInfo.getType()==ConnectivityManager.TYPE_ETHERNET){
+            return NETWORK_INTERNET;
         }
 
         // 判断是不是连接的是不是wifi

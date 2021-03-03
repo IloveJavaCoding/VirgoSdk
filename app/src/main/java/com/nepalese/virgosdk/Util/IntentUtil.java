@@ -45,27 +45,47 @@ public class IntentUtil {
         return intent;
     }
 
-    //选取图片文件
+    /**
+     * 选取图片文件
+     * @param activity
+     * @param requestCode
+     */
     public static void pickImageFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("image/*"), requestCode);
     }
 
-    //选取音频文件
+    /**
+     * 选取音频文件
+     * @param activity
+     * @param requestCode
+     */
     public static void pickAudioFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("audio/*"),requestCode);
     }
 
-    //选取视频文件
+    /**
+     * 选取视频文件
+     * @param activity
+     * @param requestCode
+     */
     public static void pickVideoFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("video/*"),requestCode);
     }
 
-    //选取文本文件
+    /**
+     * 选取文本文件
+     * @param activity
+     * @param requestCode
+     */
     public static void pickTextFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("text/plain"),requestCode);
     }
 
-    //选取任意文件
+    /**
+     * 选取任意文件
+     * @param activity
+     * @param requestCode
+     */
     public static void pickFile(Activity activity, int requestCode){
         activity.startActivityForResult(getIntent("*/*"),requestCode);
     }
@@ -185,7 +205,13 @@ public class IntentUtil {
     }
 
     //==================================打开文件、第三方APP，有返回值=================================
-    //打开其他APP
+    /**
+     * 打开其他APP
+     * @param activity
+     * @param packageName
+     * @param className
+     * @param requestCode
+     */
     public static void openThirdApp(Activity activity, String packageName, String className, int requestCode){
         Intent intent = new Intent();
         ComponentName componentName = new ComponentName(packageName, className);

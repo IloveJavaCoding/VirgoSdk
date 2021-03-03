@@ -10,7 +10,6 @@ import android.widget.ImageView;
  * @usage
  */
 public class AnimatorHelper {
-
     /**
      * rotate ImageView
      * @param imgView

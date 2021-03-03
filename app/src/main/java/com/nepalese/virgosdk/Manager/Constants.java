@@ -5,8 +5,6 @@ package com.nepalese.virgosdk.Manager;
  * @usage 常量
  */
 public class Constants {
-    //文件夹
-    public static final String DIR_DOWNLOAD = "download";
     public static final String DIR_M3U8 = "m3u8";
 
     //文件拓展名

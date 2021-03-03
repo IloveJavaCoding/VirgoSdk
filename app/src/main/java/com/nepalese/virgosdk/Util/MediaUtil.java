@@ -9,6 +9,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -44,6 +45,12 @@ public class MediaUtil {
     public static final int TYPE_URL = 2;
 
     //==========================================获取本地图片=========================================
+    /**
+     * 通过Android 媒体中心获取设备内图片相关信息
+     * @param context
+     * @return
+     */
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public static List<ImageFile> getImageList(Context context){
         List<ImageFile> imgs = new ArrayList<>();
         Cursor cursor = context.getContentResolver().query(
@@ -100,15 +107,15 @@ public class MediaUtil {
             int isMusic = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.IS_MUSIC));
 
             if(isMusic!=0 && duration>limit*1000){
-                songsInfo.setsId(id);
-                songsInfo.setsName(name);
-                songsInfo.setsDName(disName);
-                songsInfo.setaArtist(artist);
-                songsInfo.setsAlbum(album);
-                songsInfo.setsLogo(albumId);
-                songsInfo.setsPath(path);
-                songsInfo.setsDuration(duration);
-                songsInfo.setsSize(size);
+                songsInfo.setId(id);
+                songsInfo.setName(name);
+                songsInfo.setDisName(disName);
+                songsInfo.setArtist(artist);
+                songsInfo.setAlbum(album);
+                songsInfo.setLogo(albumId);
+                songsInfo.setPath(path);
+                songsInfo.setDuration(duration);
+                songsInfo.setSize(size);
 
                 songs.add(songsInfo);
             }
@@ -129,15 +136,15 @@ public class MediaUtil {
             String name = displayName.substring(0, displayName.lastIndexOf('.'));
             songsInfo = new AudioFile();
 
-            songsInfo.setsId(0);
-            songsInfo.setsName(name);
-            songsInfo.setsDName(displayName);
-            songsInfo.setaArtist(name);
-            songsInfo.setsPath(file.getAbsolutePath());
-            songsInfo.setsAlbum(name);
-            songsInfo.setsLogo(-1);//未知
-            songsInfo.setsDuration((int) getDuration(path));//duration
-            songsInfo.setsSize(file.length());
+            songsInfo.setId(0);
+            songsInfo.setName(name);
+            songsInfo.setDisName(displayName);
+            songsInfo.setArtist(name);
+            songsInfo.setPath(file.getAbsolutePath());
+            songsInfo.setAlbum(name);
+            songsInfo.setLogo(-1);//未知
+            songsInfo.setDuration((int) getDuration(path));//duration
+            songsInfo.setSize(file.length());
         }
         return songsInfo;
     }
@@ -166,15 +173,15 @@ public class MediaUtil {
         final String album = extractMetadata(metadataRetriever, MediaMetadataRetriever.METADATA_KEY_ALBUM, "unknown");
 
         AudioFile songsInfo = new AudioFile();
-        songsInfo.setsId(0);
-        songsInfo.setsName(title);
-        songsInfo.setsDName(displayName);
-        songsInfo.setaArtist(artist);
-        songsInfo.setsPath(path);
-        songsInfo.setsAlbum(album);
-        songsInfo.setsLogo(-1);//未知
-        songsInfo.setsDuration(duration);//duration
-        songsInfo.setsSize(file.length());
+        songsInfo.setId(0);
+        songsInfo.setName(title);
+        songsInfo.setDisName(displayName);
+        songsInfo.setArtist(artist);
+        songsInfo.setPath(path);
+        songsInfo.setAlbum(album);
+        songsInfo.setLogo(-1);//未知
+        songsInfo.setDuration(duration);//duration
+        songsInfo.setSize(file.length());
 
         return songsInfo;
     }
@@ -442,6 +449,13 @@ public class MediaUtil {
         return bitmap;
     }
 
+    /**
+     * 获取图片缩略图
+     * @param file
+     * @param width
+     * @param height
+     * @return
+     */
     @RequiresApi(29)
     public static Bitmap getImageThumb(File file, int width, int height) {
         Bitmap bitmap = null;
@@ -453,6 +467,13 @@ public class MediaUtil {
         return bitmap;
     }
 
+    /**
+     * 获取音频相关缩略图
+     * @param file
+     * @param width
+     * @param height
+     * @return
+     */
     @RequiresApi(29)
     public static Bitmap getAudioThumb(File file, int width, int height) {
         Bitmap bitmap = null;

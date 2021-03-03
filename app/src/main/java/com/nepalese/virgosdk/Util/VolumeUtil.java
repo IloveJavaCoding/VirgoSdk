@@ -11,7 +11,11 @@ import android.util.Log;
 public class VolumeUtil {
     private static final String TAG = "VolumeUtil";
 
-    //设置媒体音量 刻度100
+    /**
+     * 媒体音量 刻度100
+     * @param context
+     * @param value
+     */
     public static void setVolume(Context context, float value){
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (manager!=null){
@@ -28,7 +32,10 @@ public class VolumeUtil {
         }
     }
 
-    //开启静音模式
+    /**
+     * 开启静音模式
+     * @param context
+     */
     public static void muteSystem(Context context){
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (audioManager!=null){
@@ -36,7 +43,10 @@ public class VolumeUtil {
         }
     }
 
-    //关闭静音模式
+    /**
+     * 关闭静音模式
+     * @param context
+     */
     public static void unMuteSystem(Context context){
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (audioManager!=null){
@@ -44,7 +54,11 @@ public class VolumeUtil {
         }
     }
 
-    //获取当前媒体音量
+    /**
+     * 获取当前媒体音量
+     * @param context
+     * @return
+     */
     public static int getCurrentVolume(Context context){
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (audioManager!=null){
@@ -53,7 +67,10 @@ public class VolumeUtil {
         return -1;
     }
 
-    //音量增加
+    /**
+     * 音量增加
+     * @param context
+     */
     public static void volumeUp(Context context){
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (audioManager!=null){
@@ -63,7 +80,10 @@ public class VolumeUtil {
         }
     }
 
-    //音量降低
+    /**
+     * 音量降低
+     * @param context
+     */
     public static void volumeDown(Context context){
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (audioManager!=null){
@@ -73,7 +93,11 @@ public class VolumeUtil {
         }
     }
 
-    //自动调整音量
+
+    /**
+     * 自动调整音量
+     * @param context
+     */
     public static void bootResetVolume(Context context) {
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (manager != null) {

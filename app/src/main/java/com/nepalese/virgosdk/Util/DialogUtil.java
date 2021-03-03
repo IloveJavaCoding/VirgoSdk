@@ -6,10 +6,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.text.TextUtils;
 import android.view.View;
-import android.view.Window;
-import android.widget.TextView;
 
 import java.util.Calendar;
 
@@ -20,15 +17,30 @@ import java.util.Calendar;
 public class DialogUtil {
     private static final String TAG = "DialogUtil";
 
-    public static Dialog showMsgDialog(Context context, String title, String message, DialogInterface.OnClickListener listener){
+    /**
+     * 提示弹框
+     * @param context
+     * @param title 标题
+     * @param message 内容
+     * @param listener
+     * @return
+     */
+    public static void showMsgDialog(Context context, String title, String message, DialogInterface.OnClickListener listener){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        return builder.setTitle(title)
+        builder.setTitle(title)
                 .setMessage(message)
                 .setNegativeButton("cancel",listener)
                 .setPositiveButton("confirm",listener)
                 .show();
     }
 
+    /**
+     * 仅带取消键的弹框
+     * @param context
+     * @param title 标题
+     * @param message 内容
+     * @param btnText 按键信息
+     */
     public static void showIntroDialog(Context context,String title,String message,String btnText){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title)
@@ -37,6 +49,13 @@ public class DialogUtil {
                 .show();
     }
 
+    /**
+     * 列举选择弹框
+     * @param context
+     * @param items 列举项
+     * @param title
+     * @param listener
+     */
     public static void showListDialog(Context context, String[] items, String title, DialogInterface.OnClickListener listener){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title)
@@ -49,6 +68,14 @@ public class DialogUtil {
                 }).show().setCanceledOnTouchOutside(true);
     }
 
+    /**
+     * 自定义view弹框
+     * @param context
+     * @param title
+     * @param view
+     * @param listener
+     * @return
+     */
     public static Dialog showViewDialog(Context context, String title, View view, DialogInterface.OnClickListener listener){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         return builder.setTitle(title)
@@ -105,18 +132,4 @@ public class DialogUtil {
                 , true)
                 .show();
     }
-
-    //======================================================================================
-//    public Dialog getLoadingDialog(Context context, String content) {
-//        Dialog dialog = new Dialog(context);
-//        dialog.setContentView(layout.layout_loading);
-//        dialog.setCanceledOnTouchOutside(false);
-//        Window window = dialog.getWindow();
-//        TextView tvTitle = (TextView)window.findViewById(id.tvLoading);
-//        if (!TextUtils.isEmpty(content)) {
-//            tvTitle.setText(content);
-//        }
-//
-//        return dialog;
-//    }
 }

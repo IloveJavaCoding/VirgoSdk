@@ -3,11 +3,18 @@ package com.nepalese.virgosdk.OverrideMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 
+/**
+ * @author nepalese on 2020/12/01 12:07
+ * @usage 自定义掩码样式的密码输入方式
+ */
 public class VirgoPasswordTransformationMethod extends PasswordTransformationMethod {
-    private char mask;
+    private static final char DEFAULT_MASK = '*';//default mask
+
+    private final char mask;
+
     public VirgoPasswordTransformationMethod(char mask){
         if(mask==' '){
-            this.mask = '*';//default mask
+            this.mask = DEFAULT_MASK;
         }else{
             this.mask = mask;
         }

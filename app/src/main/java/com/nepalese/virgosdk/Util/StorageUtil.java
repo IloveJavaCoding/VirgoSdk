@@ -25,7 +25,11 @@ public class StorageUtil {
     public static final String TYPE_USED = "used";
 
     //====================================get system memory info====================================
-    //外部存储情况
+    /**
+     * 外部存储情况
+     * @param type total、free、used
+     * @return
+     */
     @RequiresApi(api = Build.VERSION_CODES.R)
     public static long getExternalStorageSpace(String type){
         File file = Environment.getStorageDirectory();
@@ -73,6 +77,11 @@ public class StorageUtil {
         return -1;
     }
 
+    /**
+     * 内存空间是否过低？
+     * @param context
+     * @return outInfo.availMem < (homeAppMem + ((cachedAppMem-homeAppMem)/2));
+     */
     public static boolean isLowMemory(Context context) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
@@ -81,36 +90,19 @@ public class StorageUtil {
     }
 
     //========================================get size of file/dir===================================
-    //获取指定文件的大小
+    /**
+     * 获取指定文件的大小
+     * @param path
+     * @return
+     */
     public static long getFileSize(String path) {
-        long size = -1;
         File file = new File(path);
-        //文件不存在或非文件
-        if(!file.exists() || !file.isFile()){
-            return size;
-        }
-
-        FileInputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(file);//使用FileInputStream读入file的数据流
-            size = inputStream.available();//文件的大小
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally{
-            try {
-                assert inputStream != null;
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return size;
+        return getFileSize(file);
     }
 
     public static long getFileSize(File file) {
         long size = -1;
-        if (file.exists()) {
+        if (file.exists() && file.isFile()) {
             FileInputStream inputStream = null;
             try {
                 inputStream = new FileInputStream(file);//使用FileInputStream读入file的数据流
@@ -131,7 +123,11 @@ public class StorageUtil {
         return size;
     }
 
-    //获取指定文件夹的大小
+    /**
+     * 获取指定文件夹的大小
+     * @param dir
+     * @return
+     */
     public static long getDirSize(String dir) {
         long size = -1;
         File file = new File(dir);

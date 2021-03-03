@@ -17,6 +17,10 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+/**
+ * @author nepalese on 2020/11/15 10:40
+ * @usage 横向走马灯
+ */
 public class VirgoMarqueeHorizontal extends View{
     private static final String TAG = "VirgoMarqueeHorizontal";
 
@@ -25,14 +29,15 @@ public class VirgoMarqueeHorizontal extends View{
     private int viewHeight;
 
     private Rect rect;//用于获取文字宽度
+    private String contents;//需显示内容
+
     //字体属性
     private float textSize = 20.0f;
     private int textColor = Color.YELLOW;
-    private int speed = 1;
+    private int speed = 1;//滚动速度
     private float textWidth;
 
-    private String contents;
-    private int backgroundColor = Color.BLACK;
+    private int backgroundColor = Color.BLACK;//背景颜色
     private final int FLASH_INTERVAL = 50;//ms
 
     public VirgoMarqueeHorizontal(Context context) {

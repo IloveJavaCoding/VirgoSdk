@@ -27,35 +27,56 @@ import java.util.Map;
  * @usage 系统管理：重启应用、系统，设置系统时间
  */
 public class SystemUtil {
-    //仅跳转activity
+    /**
+     * 仅activity跳转
+     * @param context
+     * @param c xxxActivity.class
+     */
     public static void jumActivity(Context context, Class c){
         Intent intent = new Intent(context, c);
         context.startActivity(intent);
     }
 
+    /**
+     * short toast
+     * @param context
+     * @param msg
+     */
     public static void showToast(Context context, String msg){
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * long toast
+     * @param context
+     * @param msg
+     */
     public void showLongToast(Context context, String msg){
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
     //==========================================reboot==============================================
-    //重启应用
+    /**
+     * 重启应用
+     * @param context
+     */
     public static void restartApp(Context context) {
         final Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
     }
 
-    //重启系统
+    /**
+     * 重启系统
+     */
     public static void reBoot(){
         String cmd = "reboot";
         RuntimeExec.getInstance().executeCommand(cmd);
     }
 
-
-    //重启activity
+    /**
+     * 重启某个activity
+     * @param activity
+     */
     private void recreate(Activity activity){
         activity.finish();
         Intent intent = new Intent(activity, activity.getClass());
@@ -63,6 +84,34 @@ public class SystemUtil {
     }
 
     //======================================permission check========================================
+    /**
+     * 权限检测：
+     *  if(!SystemUtil.checkPermission(this, NEEDED_PERMISSIONS)){
+     *      ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS, ACTION_REQUEST_PERMISSIONS);
+     *      return;
+     *   }
+     *
+     *   @Override
+     *     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+     *         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+     *         boolean isAllGranted = true;
+     *         for (int grantResult : grantResults) {
+     *             isAllGranted &= (grantResult == PackageManager.PERMISSION_GRANTED);
+     *         }
+     *
+     *         if (requestCode == ACTION_REQUEST_PERMISSIONS) {
+     *             if (isAllGranted) {
+     *                 //get all requested permissions
+     *             } else {
+     *                 showToast("Permission denied!");
+     *                 finish();
+     *             }
+     *         }
+     *     }
+     * @param context
+     * @param permissions
+     * @return
+     */
     public static boolean checkPermission(Context context, String[] permissions){
         if (permissions == null || permissions.length == 0) {
             return true;
@@ -96,7 +145,10 @@ public class SystemUtil {
         manager.setTimeZone(timeZone);
     }
 
-    //同步系统时间
+    /**
+     * 同步系统时间
+     * @param ServiceTime
+     */
     public static void timeSynchronization(Date ServiceTime){
         SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         String datetime=sdf.format(ServiceTime);

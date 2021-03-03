@@ -10,15 +10,35 @@ import java.util.List;
  */
 public class MathUtil {
     //get random number
+
+    /**
+     * 获取[a,b)之间随机数
+     * @param a
+     * @param b
+     * @return double
+     */
     public static double getRandomDouble(double a, double b) {
         return (Math.random() * (b - a)) + a;
     }
 
+    /**
+     * 获取[a,b)之间随机数
+     * @param a
+     * @param b
+     * @return int
+     */
     public static int getRandomInt(int a, int b) {
         return (int) (Math.random() * (b - a)) + a;
     }
 
-    //在指定范围内获取指定个数随机数：int
+
+    /**
+     * 在指定范围内获取指定个数随机数：int
+     * @param min
+     * @param max
+     * @param num
+     * @return
+     */
     public static List<Integer> getCountRandom(int min, int max, int num){
         if(num>(max-min))
             return null;
@@ -45,6 +65,25 @@ public class MathUtil {
         return out;
     }
 
+
+    /**
+     * 获取[a,b)内处c外随机数
+     * @param a
+     * @param b
+     * @param c
+     * @return int
+     */
+    private int getRandom(int a, int b, int c){
+        if(a>b)
+            return -1;
+        int d = (int)(Math.random()*(b-a)+a);
+        if(d!=c){
+            return d;
+        }else{
+            return getRandom(a,b,c);
+        }
+    }
+
     //设置精度
     public static double setNumberScale(double value, int scale) {
         BigDecimal bd = new BigDecimal(value);
@@ -56,7 +95,13 @@ public class MathUtil {
         return String .format(format, value);
     }
 
-    //计算由2B组成的数据长度(高位在前)
+
+    /**
+     * 计算由2Byte组成的数据长度(高位在前)
+     * @param b1
+     * @param b2
+     * @return
+     */
     private int getDataLength(byte b1, byte b2) {
 //        int temp1 = b1 << 8 & 0xffff;
 //        int temp2 = b2 & 0xff;
@@ -77,7 +122,12 @@ public class MathUtil {
         return temp;
     }
 
-    //CRC 参与校验的字段为校验值之前的所有数据，/低位在前
+    /**
+     * CRC 参与校验的字段为校验值之前的所有数据，/低位在前
+     * @param data
+     * @param length
+     * @return
+     */
     private int crcCheck(byte[] data, int length) {
         int TxCRC16 = 0;
         for (int i = 0; i < length-2; i++) {

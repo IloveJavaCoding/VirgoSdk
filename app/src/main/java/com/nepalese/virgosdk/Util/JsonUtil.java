@@ -15,8 +15,12 @@ import java.util.Map;
  * Lib： gson-2.7.jar
  */
 public class JsonUtil {
-
-    //自定义类内属性名与json字段名一致
+    /**
+     * 自定义类内属性名与json字段名一致
+     * @param json
+     * @param class1
+     * @return
+     */
     public static Object getObject(String json, Type class1) {
         try {
             Gson gson = (new GsonBuilder()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -27,6 +31,9 @@ public class JsonUtil {
         }
     }
 
+    /**
+     *   将整个类转换成json
+     */
     public static String toJson(Object object) {
         try {
             Gson gson = (new GsonBuilder()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -45,6 +52,11 @@ public class JsonUtil {
         }
     }
 
+    /**
+     * 生成json类型数据
+     * @param string_map
+     * @return
+     */
     public static String stringToJson(Map<?, ?> string_map) {
         String json;
         JSONObject object = new JSONObject(string_map);
@@ -56,6 +68,12 @@ public class JsonUtil {
         return (new Gson()).toJson(string_map);
     }
 
+    /**
+     * 获取json数据某一字段对应的值
+     * @param json
+     * @param key
+     * @return
+     */
     public static Object getResponeValue(String json, String key) {
         try {
             JSONObject jsonObject = new JSONObject(json);

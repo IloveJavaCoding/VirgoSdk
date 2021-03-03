@@ -5,16 +5,21 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Scanner;
 
+/**
+ * @author nepalese on 2020/11/20 10:19
+ * @usage 调用命令符
+ */
 public class RuntimeExec {
     public static final String INSTALL = "pm install -rl ";
     public static final String UNINSTALL = "pm uninstall ";
     public static final String AM = "am start ";
     public static final String CP = "cp ";
+    public static final String SU = "su";
+    public static final String CAP = "screencap -p ";
 
     private static volatile RuntimeExec instance;
-    private Runtime runtime = Runtime.getRuntime();
+    private final Runtime runtime = Runtime.getRuntime();
 
     private RuntimeExec() {
     }
@@ -31,25 +36,31 @@ public class RuntimeExec {
         return instance;
     }
 
-    //一般命令
+    /**
+     * 执行一般命令
+     * @param command
+     */
     public void executeCommand(String... command) {
         InputStream inputStream = this.executeCommandGetInputStream(command);
         if (inputStream != null) {
             try {
                 inputStream.close();
-            } catch (IOException var6) {
-                var6.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    //执行需root权限命令
+    /**
+     * 执行需root权限命令
+     * @param command
+     */
     public void executeRootCommand(String command) {
         Process process = null;
         DataOutputStream os = null;
 
         try {
-            process = Runtime.getRuntime().exec("su");
+            process = Runtime.getRuntime().exec(SU);
             os = new DataOutputStream(process.getOutputStream());
             os.writeBytes(command);
             os.writeBytes("\n");
@@ -57,8 +68,8 @@ public class RuntimeExec {
             os.writeBytes("exit\n");
             os.flush();
             process.waitFor();
-        } catch (Exception var14) {
-            var14.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             try {
                 if (os != null) {
@@ -71,19 +82,22 @@ public class RuntimeExec {
         }
     }
 
-    //截屏
-    public static void takeScreenShot(String file) {
+    /**
+     * 截屏
+     * @param savePath
+     */
+    public static void takeScreenShot(String savePath) {
         Process process = null;
         DataOutputStream os = null;
 
         try {
-            process = Runtime.getRuntime().exec("su");
+            process = Runtime.getRuntime().exec(SU);
             os = new DataOutputStream(process.getOutputStream());
-            os.writeBytes("screencap -p " + file);
+            os.writeBytes(CAP + savePath);
             os.flush();
             process.waitFor();
-        } catch (Exception var14) {
-            var14.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             try {
                 if (os != null) {
@@ -101,8 +115,8 @@ public class RuntimeExec {
             Process process = command.length == 1 ? this.runtime.exec(command[0]) : this.runtime.exec(command);
             (new StreamGobbler(process.getErrorStream())).start();
             return process.getInputStream();
-        } catch (IOException var3) {
-            var3.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -121,8 +135,8 @@ public class RuntimeExec {
                 while(true) {
                     br.readLine();
                 }
-            } catch (IOException var3) {
-                var3.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

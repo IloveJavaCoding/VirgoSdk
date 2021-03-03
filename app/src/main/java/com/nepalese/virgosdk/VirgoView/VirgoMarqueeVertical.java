@@ -20,6 +20,10 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author nepalese on 2020/11/15 10:40
+ * @usage 纵向走马灯
+ */
 public class VirgoMarqueeVertical extends View {
     private static final String TAG = "VirgoMarqueeVertical";
 

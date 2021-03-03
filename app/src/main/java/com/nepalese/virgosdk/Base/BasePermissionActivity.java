@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * @author nepalese on 2020/11/19 12:16
- * @usage 带一些常用配置的activity
+ * @usage 带有权限请求的activity
  */
 public class BasePermissionActivity extends BaseActivity {
     private static final int PERMISSION_REQUEST_CODE = 0x01;

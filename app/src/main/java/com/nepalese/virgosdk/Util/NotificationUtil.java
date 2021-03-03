@@ -153,5 +153,4 @@ public class NotificationUtil {
         // Send the notification.
         //startForeground(id, notification);
     }
-
 }

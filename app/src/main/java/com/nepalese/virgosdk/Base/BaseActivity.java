@@ -10,7 +10,7 @@ import org.greenrobot.eventbus.EventBus;
 
 /**
  * @author nepalese on 2020/11/21 12:07
- * @usage
+ * @usage 带有常用方法的基础activity
  */
 public class BaseActivity extends AppCompatActivity {
     private ProgressDialog dialog;
@@ -23,6 +23,11 @@ public class BaseActivity extends AppCompatActivity {
         super.setContentView(layoutResID);
     }
 
+    /**
+     * 调用加载弹框
+     * @param title
+     * @param content 提示内容
+     */
     public void showDialog(String title, String content){
         dialog = new ProgressDialog(this);
         dialog.setTitle(title);
@@ -37,6 +42,10 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * EventBus 推送消息
+     * @param obj
+     */
     public void postEvent(Object obj){
         EventBus.getDefault().post(obj);
     }

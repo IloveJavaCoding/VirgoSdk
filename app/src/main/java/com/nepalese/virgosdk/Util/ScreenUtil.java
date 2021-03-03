@@ -33,6 +33,10 @@ public class ScreenUtil {
     public static final int ORIENTATION_PORTRAIT = 1;
 
     //==============================================设置系统横竖屏===================================
+    /**
+     * 设置系统横竖屏, 会重启
+     * @param orientation
+     */
     public static void setOrientation(int orientation){
         switch (orientation){
             case ORIENTATION_LANDSCAPE:
@@ -46,33 +50,32 @@ public class ScreenUtil {
         }
     }
 
-    //////////////////////////////////////////////////沉浸式//////////////////////////////////////////
-    public static void setImmersionLayout(Activity activity) {
-        View decorView = activity.getWindow().getDecorView();
-        int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-        decorView.setSystemUiVisibility(option);
-        activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
-        activity.getWindow().setNavigationBarColor(Color.TRANSPARENT);
-    }
-
     //=========================================截屏==================================================
+    /**
+     * 截屏：默认存放在APP安装文件根目录下
+     * @param activity
+     * @param fileName
+     */
     public static void screenCap(Activity activity, String fileName){
         View dView = activity.getWindow().getDecorView();
         dView.setDrawingCacheEnabled(true);
         dView.buildDrawingCache();
         Bitmap bmp = dView.getDrawingCache();
 
-        if (bmp != null)
-        {
+        if (bmp != null) {
             String path = FileUtil.getAppRootPth(activity);
             BitmapUtil.saveBitmap2File(bmp, path, fileName);
         }
     }
 
-    //默认存放在APP安装文件根目录下
-    public static void screenShot(Context context, String fileName){
+    /**
+     * 使用su命令截屏：
+     * 1. 需root;
+     * 2. 默认存放在APP安装文件根目录下
+     * @param context
+     * @param fileName
+     */
+    public static void screenCap(Context context, String fileName){
         String path = FileUtil.getAppRootPth(context) + File.separator + fileName;
         RuntimeExec.takeScreenShot(path);
     }
@@ -177,7 +180,11 @@ public class ScreenUtil {
     }
 
     //==========================================屏幕亮度============================================
-    //设置当前屏幕亮度值 0--255，并使之生效
+    /**
+     * 设置当前屏幕亮度值，并使之生效
+     * @param act
+     * @param value 0--255
+     */
     public static void setScreenBrightness(Activity act, float value) {
         value = value>255.0f? 255.0f : Math.max(value, 0.0f);
         WindowManager.LayoutParams lp = act.getWindow().getAttributes();

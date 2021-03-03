@@ -48,7 +48,7 @@ public class WebCrawlUtil {
         if(type==TYPE_LINK_ALL){
             return crawlWebPage(html);
         }else if (type==TYPE_LINK_IMG){
-            return crawlImage(html);
+            return crawlImage2(html);
         }
         return null;
     }
@@ -148,11 +148,37 @@ public class WebCrawlUtil {
                 //3. 完整的链接
                 list.add(link);
             }
-            return (List<String>) list;
+            return list;
         }
         else{
             Log.e(TAG, "crawlWebPage: 网页内容为空");
         }
         return null;
+    }
+
+    private static List<String> crawlImage2(String html){
+        if(!TextUtils.isEmpty(html)){
+            List<String> urls = MatchUtil.matchNumsUrl(html);
+            return filterUrl(urls);
+        } else{
+            Log.e(TAG, "crawlWebPage: 网页内容为空");
+        }
+        return null;
+    }
+
+    private static List<String> filterUrl(List<String> urls) {
+        List<String> out = new ArrayList<>();
+        for(String str: urls) {
+            if((str.startsWith("http") || str.startsWith("https"))) {
+                if(str.contains("jpeg") || str.contains("png")) {
+                    if(!str.contains("token")) {
+                        str = str.substring(0, str.indexOf("jpeg")+4);
+                    }
+                    out.add(str);
+                }
+            }
+        }
+
+        return out;
     }
 }

@@ -19,6 +19,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -41,7 +42,12 @@ public class HardwareUtil {
         }
     }
 
-    //获取IP地址：
+
+    /**
+     * 获取IP地址：
+     * @param context
+     * @return
+     */
     @RequiresPermission("android.permission.ACCESS_NETWORK_STATE")
     public static String getIpAddress(Context context) {
         ConnectivityManager conMann = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -118,7 +124,11 @@ public class HardwareUtil {
     }
 
     ////////////////////////////////wifi 模块////////////////////////////////////////////
-    //检测wifi功能是否正常
+    /**
+     * 检测wifi功能是否正常
+     * @param context
+     * @return
+     */
     public static boolean isWifiWell(Context context) {
         WifiManager localWifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (!localWifiManager.isWifiEnabled()) {
@@ -145,14 +155,21 @@ public class HardwareUtil {
     }
 
     //////////////////////////////////TF 卡模块///////////////////////////////////////////////
-    //判断内存卡是否已插入 _> 内置sd卡
-    //<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+    /**
+     * 判断内存卡是否已插入 _> 内置sd卡
+     * <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+     * @return
+     */
     public static boolean hasTFCard() {
         String state = android.os.Environment.getExternalStorageState();
         return android.os.Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    //判断外置SD/TF卡是否挂载
+    /**
+     * 判断外置SD/TF卡是否挂载
+     * @param context
+     * @return
+     */
     public static boolean isExistTF(Context context) {
         boolean result = false;
         StorageManager mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);

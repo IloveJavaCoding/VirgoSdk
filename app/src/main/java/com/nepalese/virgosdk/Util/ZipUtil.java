@@ -18,6 +18,13 @@ import java.util.Collections;
  */
 public class ZipUtil {
     //====================================zip/unzip file/dir========================================
+    /**
+     * 解压文件
+     * @param path 压缩包文件路径
+     * @param aimPath 解压到..位置
+     * @param password 解压密码（与压缩对应）
+     * @throws ZipException
+     */
     public static void unZip(String path, String aimPath, String password) throws ZipException {
         File file = new File(path);
         if(!file.exists()){
@@ -51,6 +58,13 @@ public class ZipUtil {
         }
     }
 
+    /**
+     * 压缩文件
+     * @param path 需压缩文件、文件夹路径
+     * @param aimPath 压缩到指定位置
+     * @param password 压缩密码（null -> 不设置密码）
+     * @return
+     */
     public static boolean zipFile(String path, String aimPath, String password) {
         File file = new File(path);
         if (!file.exists()) {

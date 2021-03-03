@@ -3,6 +3,10 @@ package com.nepalese.virgosdk.OverrideMethod;
 import android.view.MotionEvent;
 import android.view.View;
 
+/**
+ * @author nepalese on 2021/01/18 10:43
+ * @usage 自定义双击监听
+ */
 public class VirgoOnDoubleClickListener implements View.OnTouchListener{
     private int count = 0;//点击次数
     private long firstClick = 0;//第一次点击时间

@@ -1,8 +1,10 @@
 package com.nepalese.virgosdk.Util;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.lang.reflect.Method;
 
@@ -14,7 +16,7 @@ public class SIMOperatorUtil {
     private static final String TAG = "SIMOperatorUtil";
 
     public static final int TYPE_NO_SIM = -1; //无sim卡
-    public static final int TYPE_UNKNOWN = 0;
+    public static final int TYPE_UNKNOWN = 0; //未知运营商
     public static final int TYPE_CMCC = 1; //中国移动
     public static final int TYPE_CUCC = 2; //中国联通
     public static final int TYPE_CTCC = 3; //中国电信
@@ -37,13 +39,19 @@ public class SIMOperatorUtil {
         telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
-    //检查手机是否有sim卡
+    /**
+     * 检查设备是否插入sim卡
+     * @return
+     */
     public boolean hasSim() {
         String operator = telephonyManager.getSimOperator();
         return TextUtils.isEmpty(operator);
     }
 
-    //判断数据流量开关是否打开
+    /**
+     * 判断数据流量开关是否打开
+     * @return
+     */
     public boolean isMobileDataEnabled() {
         try {
             Method getDataEnabled = telephonyManager.getClass().getDeclaredMethod("getDataEnabled");
@@ -54,7 +62,27 @@ public class SIMOperatorUtil {
         return false;
     }
 
-    //手机流量开关
+    /**
+     * 判断数据流量开关是否打开
+     * @param context
+     * @return
+     */
+    public boolean isMobileDataEnabled(Context context) {
+        try {
+            Method method = ConnectivityManager.class.getDeclaredMethod("getMobileDataEnabled");
+            method.setAccessible(true);
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            return (Boolean) method.invoke(connectivityManager);
+        } catch (Throwable t) {
+            Log.e(TAG, "Check mobile data encountered exception");
+            return false;
+        }
+    }
+
+    /**
+     * 设置数据流量开关
+     * @param enabled
+     */
     public void setMobileDataEnabled(boolean enabled) {
         try {
             Method setDataEnabled = telephonyManager.getClass().getDeclaredMethod("setDataEnabled", boolean.class);
@@ -64,7 +92,10 @@ public class SIMOperatorUtil {
         }
     }
 
-    //获取设备拨号运营商
+    /**
+     * 获取设备拨号运营商
+     * @return
+     */
     public int getSimOperatorType() {
         int opeType = TYPE_NO_SIM;
 

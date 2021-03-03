@@ -1,85 +1,85 @@
 package com.nepalese.virgosdk.Beans;
 
 public class AudioFile extends BaseBean{
-    private long sId;
-    private String sName;
-    private String sDName;
-    private String aArtist;
-    private String sPath;
-    private String sAlbum;//专辑
-    private long sLogo; //图片id
-    private int sDuration;//duration
-    private long sSize;
+    private long id;
+    private String name;
+    private String disName;
+    private String artist;
+    private String path;
+    private String album;//专辑
+    private long logo; //图片id
+    private int duration;//duration
+    private long size;
 
-    public String getsDName() {
-        return sDName;
+    public String getDisName() {
+        return disName;
     }
 
-    public void setsDName(String sDname) {
-        this.sDName = sDname;
+    public void setDisName(String sDname) {
+        this.disName = sDname;
     }
 
-    public long getsLogo() {
-        return sLogo;
+    public long getLogo() {
+        return logo;
     }
 
-    public void setsLogo(long sLogo) {
-        this.sLogo = sLogo;
+    public void setLogo(long logo) {
+        this.logo = logo;
     }
 
-    public long getsId() {
-        return sId;
+    public long getId() {
+        return id;
     }
 
-    public void setsId(long sId) {
-        this.sId = sId;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public long getsSize() {
-        return sSize;
+    public long getSize() {
+        return size;
     }
 
-    public void setsSize(long sSize) {
-        this.sSize = sSize;
+    public void setSize(long size) {
+        this.size = size;
     }
 
-    public String getsName() {
-        return sName;
+    public String getName() {
+        return name;
     }
 
-    public void setsName(String sName) {
-        this.sName = sName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getaArtist() {
-        return aArtist;
+    public String getArtist() {
+        return artist;
     }
 
-    public void setaArtist(String aArtist) {
-        this.aArtist = aArtist;
+    public void setArtist(String artist) {
+        this.artist = artist;
     }
 
-    public String getsPath() {
-        return sPath;
+    public String getPath() {
+        return path;
     }
 
-    public void setsPath(String sPath) {
-        this.sPath = sPath;
+    public void setPath(String path) {
+        this.path = path;
     }
 
-    public String getsAlbum() {
-        return sAlbum;
+    public String getAlbum() {
+        return album;
     }
 
-    public void setsAlbum(String sAlbum) {
-        this.sAlbum = sAlbum;
+    public void setAlbum(String album) {
+        this.album = album;
     }
 
-    public int getsDuration() {
-        return sDuration;
+    public int getDuration() {
+        return duration;
     }
 
-    public void setsDuration(int sDuration) {
-        this.sDuration = sDuration;
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }

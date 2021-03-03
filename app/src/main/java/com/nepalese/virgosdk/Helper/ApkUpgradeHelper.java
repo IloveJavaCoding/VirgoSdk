@@ -1,7 +1,6 @@
 package com.nepalese.virgosdk.Helper;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -14,13 +13,20 @@ import java.io.File;
  * @usage 安装包升级
  */
 public class ApkUpgradeHelper {
-    //==========================静默安装apk============================================
-    //需root权限
+    /**
+     * 静默安装apk(需root权限)
+     * @param filePath
+     */
     public static void installApkSilence(final String filePath){
         new Thread(() -> RuntimeExec.getInstance().executeRootCommand(RuntimeExec.INSTALL + filePath)).start();
     }
 
-    //需手动授权
+    /**
+     * 跳转安装apk（需手动授权）
+     * @param activity
+     * @param file
+     * @param requestCode
+     */
     public static void installApkManual(Activity activity, File file, int requestCode) {
         Intent intent = new Intent(Intent.ACTION_VIEW);//"android.intent.action.VIEW"
         intent.setDataAndType(Uri.fromFile(file),"application/vnd.android.package-archive");
