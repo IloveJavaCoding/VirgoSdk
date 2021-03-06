@@ -14,6 +14,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.renderscript.Allocation;
@@ -117,8 +118,7 @@ public class BitmapUtil {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
-    //string <--> bitmap
-
+    //string <--> bitma
     /**
      * bitmap 转 string
      * @param bitmap
@@ -218,6 +218,172 @@ public class BitmapUtil {
         }
     }
 
+
+    //========================================bitmap 调控============================================
+    /**
+     * 反转图片 :把每个像素点的每个rgb值都与255相减（alpha的值不改变）
+     * @param bitmap
+     * @return
+     */
+    public static Bitmap convertBitmap(Bitmap bitmap){
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        int[] pixels = new int[w * h];
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+
+        for(int i=0; i<pixels.length; i++){
+            int a = (pixels[i] & 0xff000000)>>24;
+            int r = (pixels[i] & 0x00ff0000)>>16;
+            int g = (pixels[i] & 0x0000ff00)>>8;
+            int b = pixels[i] & 0x000000ff;
+
+            pixels[i] = a<<24 | (255-r)<<16 | (255-g) <<8 | (255-b);
+        }
+
+        bitmap = Bitmap.createBitmap(pixels, w, h, Bitmap.Config.ARGB_8888);
+        return bitmap;
+    }
+
+    /**
+     * 转灰度图:Gray Scale Image 或是Grey Scale Image，又称灰阶图。
+     * 把白色与黑色之间按对数关系分为若干等级，称为灰度。
+     * 灰度分为256阶。
+     * 用灰度表示的图像称作灰度图。
+     * 1.浮点算法：Gray=R0.3+G0.59+B*0.11
+     * 2.整数方法：Gray=(R30+G59+B*11)/100
+     * 3.移位方法：Gray =(R76+G151+B*28)>>8;
+     * 4.平均值法：Gray=（R+G+B）/3;
+     * 5.仅取绿色：Gray=G；
+     * @param bitmap
+     * @return
+     */
+    public static Bitmap grayBitmap(Bitmap bitmap){
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        int[] pixels = new int[w * h];
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+
+        for(int i=0; i<pixels.length; i++){
+            int a = (pixels[i] & 0xff000000)>>24;
+            int r = (pixels[i] & 0x00ff0000)>>16;
+            int g = (pixels[i] & 0x0000ff00)>>8;
+            int b = pixels[i] & 0x000000ff;
+
+            int avg = (r+g+b)/3;
+            pixels[i] = a<<24 | (avg)<<16 | (avg) <<8 | (avg);
+        }
+
+        bitmap = Bitmap.createBitmap(pixels, w, h, Bitmap.Config.ARGB_8888);
+        return bitmap;
+    }
+
+    /**
+     * 将图片转ASCII码字符
+     * @param bitmap 源图
+     * @return 码图
+     */
+    public static String bitmap2AsciiStr(Bitmap bitmap){
+        //把字符分成15阶，即0-14
+        String[] arr = {"M","N","H","Q","$","O","C","?","7",">","!",":","–",";","."};
+
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        int[] pixels = new int[w * h];
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+        StringBuilder builder = new StringBuilder();
+
+        //将每个像素转换相应的字符
+        for(int i=0; i<pixels.length; i++){
+            int r = (pixels[i] & 0x00ff0000)>>16;
+            int g = (pixels[i] & 0x0000ff00)>>8;
+            int b = pixels[i] & 0x000000ff;
+
+            int avg = (r+g+b)/3;
+            //0-255转换成0-14阶
+            int step = (int) Math.floor(avg/18f);
+            if(i>0 && i%w==0){
+                //换行
+                builder.append("\n");
+            }
+            builder.append(arr[step]);
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * 将图片转ASCII码字符文件
+     * @param bitmap 源图
+     */
+    public static void bitmap2AsciiFile(Bitmap bitmap, String path, String name){
+        FileUtil.writeToFile(bitmap2AsciiStr(bitmap), path, name);
+    }
+
+    /**
+     * 将图片转ASCII码图
+     * @param bitmap 源图
+     * @return 码图
+     */
+    public static Bitmap bitmap2Ascii(Bitmap bitmap){
+        //把字符分成15阶，即0-14
+        String[] arr = {"M","N","H","Q","$","O","C","?","7",">","!",":","–",";","."};
+        //一个像素转为字符后缩放比例
+        int scale =7;
+        int maxPix = 170000;
+        float textSize = 12;
+
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        //缩放图片: 防溢出
+        if(w*h>maxPix){
+            int rate = (int) Math.round(Math.sqrt(w*h*1f/maxPix));
+            Log.i(TAG, "缩放图片: " + rate);
+            bitmap = BitmapUtil.scaleBitmap(bitmap, 1f/rate);
+
+            w = bitmap.getWidth();
+            h = bitmap.getHeight();
+        }
+
+        int[] pixels = new int[w * h];
+
+        //获取像素点
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+
+        //初始化
+        StringBuilder builder = new StringBuilder();
+        Bitmap outBitmap = Bitmap.createBitmap(w*scale, h*scale, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outBitmap);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setTypeface(Typeface.MONOSPACE);
+        paint.setTextSize(textSize);
+        paint.setColor(Color.BLACK);
+
+        //白底
+        canvas.drawColor(Color.WHITE);
+
+        //将每个像素转换相应的字符
+        for(int i=0; i<pixels.length; i++){
+            int r = (pixels[i] & 0x00ff0000)>>16;
+            int g = (pixels[i] & 0x0000ff00)>>8;
+            int b = pixels[i] & 0x000000ff;
+
+            //灰度算法
+            int avg = (r+g+b)/3;
+            //0-255转换成0-14阶
+            int step = (int) Math.floor(avg/18f);
+            if(i>0 && i%w==0){
+                //换行、绘制、重置
+                builder.append("\n");
+                canvas.drawText(builder.toString(), 0, (int)(i/w)*scale, paint);
+                builder.delete(0, builder.capacity());
+            }
+            builder.append(arr[step]);
+        }
+
+        return outBitmap;
+    }
 
     //=========================================bitmap 操控==========================================
     /**
