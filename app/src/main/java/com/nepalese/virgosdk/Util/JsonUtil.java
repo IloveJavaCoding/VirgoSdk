@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * @author nepalese on 2020/11/18 12:10
  * @usage Json 转换
- * Lib： gson-2.7.jar
+ * implementation 'com.google.code.gson:gson:2.8.6'
  */
 public class JsonUtil {
     /**
@@ -29,6 +29,17 @@ public class JsonUtil {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * @param json
+     * @param tClass
+     * @param <T>
+     * @return
+     */
+    public static <T> Object getObject(String json, Class<T> tClass){
+        Gson gson = new Gson();
+        return gson.fromJson(json, tClass);
     }
 
     /**

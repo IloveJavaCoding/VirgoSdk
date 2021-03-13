@@ -2,6 +2,7 @@ package com.nepalese.virgosdk.Util;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -77,10 +78,28 @@ public class SystemUtil {
      * 重启某个activity
      * @param activity
      */
-    private void recreate(Activity activity){
+    public static void recreate(Activity activity){
         activity.finish();
         Intent intent = new Intent(activity, activity.getClass());
         activity.startActivity(intent);
+    }
+
+    ///////////////////////////////////////
+    /**
+     * 打开第三方apk
+     * @param context
+     * @param packagename 包名
+     */
+    public static void openThirdApk(Context context, String packagename){
+        Intent intent2 = context.getPackageManager().getLaunchIntentForPackage(packagename);
+        String classNameString = intent2.getComponent().getClassName();//得到app类名
+        Intent intent  = new Intent();
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        intent.setComponent(new ComponentName(packagename, classNameString));
+        context.startActivity(intent);
     }
 
     //======================================permission check========================================
