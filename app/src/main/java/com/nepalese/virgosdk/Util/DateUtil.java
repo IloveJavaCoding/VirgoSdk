@@ -49,6 +49,23 @@ public class DateUtil {
     }
 
     /**
+     * 字符时间 -> 时间戳：不同格式大小不一样
+     * @param time
+     * @param format
+     * @return
+     */
+    public static long string2LongTime(String time, String format){
+        SimpleDateFormat df = new SimpleDateFormat(format, Locale.CANADA);
+        Date parse = null;
+        try {
+            parse = df.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return parse.getTime();
+    }
+
+    /**
      * 时间戳 转 字符
      * @param time
      * @param format
@@ -64,27 +81,38 @@ public class DateUtil {
      * 当前时间
      * @return date
      */
-    public static Date getCurTime(){
+    public static Date getCurTimeDate(){
         return Calendar.getInstance().getTime();
     }
 
     /**
-     * 当前时间
+     * 当前时间：完整时间戳
      * @return 时间戳
      */
-    public static long getCurTime2(){
+    public static long getCurTimeLong(){
         return System.currentTimeMillis();
     }
 
+
     /**
-     * 当前时间
+     * 当前时间: 与格式对应时间戳
+     * @param format
+     * @return long
+     */
+    public static long getCurTimeLong2(String format){
+        SimpleDateFormat df = new SimpleDateFormat(format, Locale.CHINA);
+        String curString = df.format(new Date());
+        return string2LongTime(curString, format);
+    }
+
+    /**
+     * 当前时间: 字符串格式
      * @param format
      * @return string
      */
-    public static String getCurTime(String format){
-        return date2String(getCurTime(), format);
+    public static String getCurTimeStr(String format){
+        return date2String(getCurTimeDate(), format);
     }
-
     //==========================================简单计算============================================
     /**
      * 基于生日日期获取年龄

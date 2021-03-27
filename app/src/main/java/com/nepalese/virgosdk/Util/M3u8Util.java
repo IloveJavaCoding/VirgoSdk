@@ -195,7 +195,7 @@ public class M3u8Util {
                     } else {
                         newUrl = line;
                     }
-                    String m3u8Name2 = ConvertUtil.string2Hex(String.valueOf(DateUtil.getCurTime2())) + ".m3u8";
+                    String m3u8Name2 = ConvertUtil.string2Hex(String.valueOf(DateUtil.getCurTimeLong())) + ".m3u8";
                     // 获取远程文件
                     cacheM3u8File(newUrl);
                     // 进行递归获取数据
@@ -249,7 +249,7 @@ public class M3u8Util {
 
     // 合并文件
     private void mergeTsFile(M3U8 m3u8, String outDir){
-        String saveName = DateUtil.getCurTime().toString() + ".mp4";
+        String saveName = DateUtil.getCurTimeDate().toString() + ".mp4";
         String savePath = outDir + File.separator + saveName;
         File file = new File(savePath);
 
