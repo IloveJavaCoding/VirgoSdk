@@ -170,39 +170,70 @@ public class HardwareUtil {
      * @param context
      * @return
      */
+//    public static boolean isExistTF(Context context) {
+//        boolean result = false;
+//        StorageManager mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+//        Class<?> storageVolumeClazz;
+//        try {
+//            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
+//            Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
+//            Method getPath = storageVolumeClazz.getMethod("getPath");
+//            Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
+//            Method getState = storageVolumeClazz.getMethod("getState");
+//            Object obj = null;
+//            try {
+//                obj = getVolumeList.invoke(mStorageManager);
+//            } catch (InvocationTargetException e) {
+//                e.printStackTrace();
+//            }
+//            final int length = Array.getLength(obj);
+//            for (int i = 0; i < length; i++) {
+//                Object storageVolumeElement = Array.get(obj, i);
+//                String path = (String) getPath.invoke(storageVolumeElement);
+//                boolean removable = (Boolean) isRemovable.invoke(storageVolumeElement);
+//                String state = (String) getState.invoke(storageVolumeElement);
+//                if (removable) {
+//                    assert state != null;
+//                    if (state.equals(Environment.MEDIA_MOUNTED)) {
+//                        result = true;
+//                        break;
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return result;
+//    }
+
     public static boolean isExistTF(Context context) {
-        boolean result = false;
-        StorageManager mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
-        Class<?> storageVolumeClazz;
+        boolean isMounted = false;
+        StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+
         try {
-            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
-            Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
-            Method getPath = storageVolumeClazz.getMethod("getPath");
-            Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
-            Method getState = storageVolumeClazz.getMethod("getState");
-            Object obj = null;
-            try {
-                obj = getVolumeList.invoke(mStorageManager);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
-            final int length = Array.getLength(obj);
-            for (int i = 0; i < length; i++) {
-                Object storageVolumeElement = Array.get(obj, i);
-                String path = (String) getPath.invoke(storageVolumeElement);
-                boolean removable = (Boolean) isRemovable.invoke(storageVolumeElement);
-                String state = (String) getState.invoke(storageVolumeElement);
-                if (removable) {
-                    assert state != null;
-                    if (state.equals(Environment.MEDIA_MOUNTED)) {
-                        result = true;
-                        break;
+            Method getVolumList = StorageManager.class.getMethod("getVolumeList", null);
+            getVolumList.setAccessible(true);
+            Object[] results = (Object[])getVolumList.invoke(sm, null);
+            if (results != null) {
+                for (Object result : results) {
+                    Method mRemoveable = result.getClass().getMethod("isRemovable", null);
+                    Boolean isRemovable = (Boolean) mRemoveable.invoke(result, null);
+                    if (isRemovable) {
+                        Method getPath = result.getClass().getMethod("getPath", null);
+                        String path = (String) getPath.invoke(result, null);
+                        Method getState = sm.getClass().getMethod("getVolumeState", String.class);
+                        String state = (String)getState.invoke(sm, path);
+                        if (Environment.MEDIA_MOUNTED.equals(state)) {
+                            isMounted = true;
+                            break;
+                        }
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
             e.printStackTrace();
         }
-        return result;
+
+        return isMounted;
     }
 }
