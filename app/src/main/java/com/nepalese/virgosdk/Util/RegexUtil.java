@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * @author nepalese on 2020/11/18 12:04
  * @usage 正则匹配，筛选数据
  */
-public class MatchUtil {
+public class RegexUtil {
 
     /**
      *  输入手机号码格式是否正确

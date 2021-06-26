@@ -8,18 +8,26 @@ import android.net.NetworkInfo;
 import android.net.TrafficStats;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-
-import androidx.annotation.RequiresPermission;
+import android.util.Log;
 
 import com.nepalese.virgosdk.Beans.BaseBean;
 
+import java.lang.reflect.Method;
 import java.util.List;
+
+import androidx.annotation.RequiresPermission;
 
 /**
  * @author nepalese on 2020/11/18 08:49
- * @usage  获取网络连接类型，流量使用情况
+ * @usage
+ * 1. 判断有无sim卡， 获取SIM运营商；
+ * 2. 数据流量是否打开及开关控制；
+ * 1. 获取网络连接类型；
+ * 2. 流量使用情况；
  */
 public class NetworkUtil {
+    private static final String TAG = "NetworkUtil";
+
     public static final int NETWORK_NONE = 0;      //没有网络连接
     public static final int NETWORK_INTERNET = 1;  //有线连接
     public static final int NETWORK_WIFI = 2;      //wifi连接
@@ -30,6 +38,99 @@ public class NetworkUtil {
     public static final int NETWORK_5G = 6;
     public static final int NETWORK_MOBILE = 7;
 
+    public static final int TYPE_NO_SIM = -1; //无sim卡
+    public static final int TYPE_UNKNOWN = 0; //未知运营商
+    public static final int TYPE_CMCC = 1; //中国移动
+    public static final int TYPE_CUCC = 2; //中国联通
+    public static final int TYPE_CTCC = 3; //中国电信
+
+    private static volatile NetworkUtil instance;
+    private final TelephonyManager telephonyManager;
+
+    public static NetworkUtil getInstance(Context context) {
+        if (instance == null) {
+            synchronized (NetworkUtil.class) {
+                if (instance == null) {
+                    instance = new NetworkUtil(context);
+                }
+            }
+        }
+        return instance;
+    }
+
+    private NetworkUtil(Context context) {
+        telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+    }
+
+    //========================================getInstancc===========================================
+    /**
+     * 检查设备是否插入sim卡
+     * @return
+     */
+    public boolean hasSim() {
+        String operator = telephonyManager.getSimOperator();
+        return TextUtils.isEmpty(operator);
+    }
+
+    /**
+     * 判断数据流量开关是否打开
+     * @return
+     */
+    public boolean isMobileDataEnabled() {
+        try {
+            Method getDataEnabled = telephonyManager.getClass().getDeclaredMethod("getDataEnabled");
+            return (Boolean) getDataEnabled.invoke(telephonyManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * 设置数据流量开关
+     * @param enabled
+     */
+    public void setMobileDataEnabled(boolean enabled) {
+        try {
+            Method setDataEnabled = telephonyManager.getClass().getDeclaredMethod("setDataEnabled", boolean.class);
+            setDataEnabled.invoke(telephonyManager, enabled);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 获取设备拨号运营商
+     * @return
+     */
+    public int getSimOperatorType() {
+        int opeType = TYPE_NO_SIM;
+
+        // No sim
+        if (hasSim()) {
+            return opeType;
+        }
+
+        String operator = telephonyManager.getNetworkOperator();
+        // 中国移动
+        if ("46000".equals(operator) || "46002".equals(operator) || "46004".equals(operator) || "46007".equals(operator)) {
+            opeType = TYPE_CMCC;
+        }
+        // 中国联通
+        else if ("46001".equals(operator) || "46006".equals(operator) || "46009".equals(operator)) {
+            opeType = TYPE_CUCC;
+        }
+        // 中国电信
+        else if ("46003".equals(operator) || "46005".equals(operator) || "46011".equals(operator)) {
+            opeType = TYPE_CTCC;
+        }
+        else {
+            opeType = TYPE_UNKNOWN;
+        }
+        return opeType;
+    }
+
+    //==============================================网络连接类型=====================================
     /**
      * 获取当前网络连接类型
      * @param context
@@ -185,6 +286,40 @@ public class NetworkUtil {
     }
 
     /**
+     * 判断设备是否联网
+     * @param context
+     * @return 是否联网
+     */
+    @RequiresPermission("android.permission.ACCESS_NETWORK_STATE")
+    public static boolean isConnected(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = null;
+        if (cm != null) {
+            info = cm.getActiveNetworkInfo();
+        }
+        return info != null && info.isAvailable();
+    }
+
+    /**
+     * 判断数据流量开关是否打开
+     * @param context
+     * @return
+     */
+    public static boolean isMobileDataEnabled(Context context) {
+        try {
+            Method method = ConnectivityManager.class.getDeclaredMethod("getMobileDataEnabled");
+            method.setAccessible(true);
+            ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            return (Boolean) method.invoke(manager);
+        } catch (Throwable t) {
+            Log.e(TAG, "Check mobile data encountered exception");
+            return false;
+        }
+    }
+
+    //===========================================流量================================================
+    /**
      * 获取系统所用流量数: 上传 + 下载
      * @return
      */
@@ -194,7 +329,7 @@ public class NetworkUtil {
 
     /**
      * 获取某APP所用下载流量
-     * @param uid: ApkInfoUtil.getInstance(content).getAppUid(packageName)
+     * @param uid: PackageUtil.getInstance(content).getAppUid(packageName)
      * @return
      */
     private long getAppRxByte(int uid){
@@ -210,7 +345,13 @@ public class NetworkUtil {
         return TrafficStats.getUidTxBytes(uid)==TrafficStats.UNSUPPORTED ? 0 :(TrafficStats.getUidTxBytes(uid));
     }
 
-    //==========================获取APP当月流量消耗情况================================
+    //=====================================获取APP当月流量消耗情况====================================
+    /**
+     * APP当月流量消耗情况
+     * @param packageName 包名
+     * @param context
+     * @return
+     */
     public static FlowInfo getDataFlowInfo(String packageName, Context context) {
         PackageManager pms = context.getPackageManager();
         List<PackageInfo> packinfos = pms.getInstalledPackages(PackageManager.GET_PERMISSIONS);
@@ -236,7 +377,7 @@ public class NetworkUtil {
         return flowInfo;
     }
 
-    //================================self class=======================================
+    //==============================================================================================
     public enum NetworkType {
         NETWORK_INTERNET("Internet"),
         NETWORK_WIFI("WiFi"),

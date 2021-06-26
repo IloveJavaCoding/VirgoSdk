@@ -1,14 +1,17 @@
 package com.nepalese.virgosdk.Util;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresPermission;
@@ -16,16 +19,23 @@ import androidx.core.content.ContextCompat;
 
 import com.nepalese.virgosdk.Manager.RuntimeExec;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 /**
  * @author nepalese on 2020/11/18 10:43
- * @usage 系统管理：重启应用、系统，设置系统时间
+ * @usage 系统管理：
+ * 1. 重启应用、系统；
+ * 2. 打开安装app；
+ * 3. 权限检测；todo
+ * 4. 设置系统时间；
+ *
  */
 public class SystemUtil {
     /**
@@ -55,14 +65,14 @@ public class SystemUtil {
     public void showLongToast(Context context, String msg){
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
-    //==========================================reboot==============================================
+    //==========================================重启================================================
     /**
      * 重启应用
      * @param context
      */
     public static void restartApp(Context context) {
         final Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);//Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(intent);
     }
 
@@ -84,7 +94,7 @@ public class SystemUtil {
         activity.startActivity(intent);
     }
 
-    ///////////////////////////////////////
+    //==============================================================================================
     /**
      * 打开第三方apk
      * @param context
@@ -102,6 +112,52 @@ public class SystemUtil {
         context.startActivity(intent);
     }
 
+    /**
+     * 静默安装apk(需root权限)
+     * @param filePath
+     */
+    public static void installApkSilence(final String filePath){
+        new Thread(() -> RuntimeExec.getInstance().executeRootCommand(RuntimeExec.INSTALL + filePath)).start();
+    }
+
+    /**
+     * 跳转安装apk（需手动授权）
+     * @param activity
+     * @param file
+     * @param requestCode
+     */
+    public static void installApkManual(Activity activity, File file, int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);//"android.intent.action.VIEW"
+        intent.setDataAndType(Uri.fromFile(file),"application/vnd.android.package-archive");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        activity.startActivityForResult(intent, requestCode);//处理取消安装
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
+    /**
+     * 校验当前App是否在运行或前台有其他app在运行
+     * @param context
+     * @return
+     */
+    public static boolean isRuning(Context context){
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            List<ActivityManager.RunningTaskInfo> infos = manager.getRunningTasks(Integer.MAX_VALUE);
+            if(infos!=null){
+                int size = infos.size();
+//                Log.d(TAG, "运行程序个数: " + size);
+//                for(ActivityManager.RunningTaskInfo info: infos){
+//                    Log.v(TAG, ": " + info.topActivity.getPackageName());
+//                    //桌面：com.android.launcher
+//                }
+                return size>1;
+            }
+            return false;
+        }
+        return true;
+    }
     //======================================permission check========================================
     /**
      * 权限检测：

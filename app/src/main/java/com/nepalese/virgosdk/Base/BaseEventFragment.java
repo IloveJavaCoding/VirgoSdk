@@ -1,24 +1,21 @@
 package com.nepalese.virgosdk.Base;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.greenrobot.eventbus.EventBus;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
-import org.greenrobot.eventbus.EventBus;
 
 /**
  * @author nepalese on 2020/12/5 09:50
  * @usage 自带EventBus 注册的 Fragment
  */
 public class BaseEventFragment extends Fragment {
-    private static final String TAG = "BaseEventFragment";
-
     public BaseEventFragment(){
     }
 
@@ -48,8 +45,7 @@ public class BaseEventFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        Log.e(TAG, "onDestroy: ");
-        super.onDestroy();
         unregisterEvent();
+        super.onDestroy();
     }
 }

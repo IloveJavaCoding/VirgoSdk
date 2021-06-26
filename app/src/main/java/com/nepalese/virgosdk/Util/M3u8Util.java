@@ -10,6 +10,7 @@ import com.nepalese.virgosdk.Beans.M3U8Ts;
 import com.nepalese.virgosdk.Manager.Constants;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,20 +18,29 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 /**
  * @author nepalese on 2020/11/23 13:53
- * @usage m3u8文件下载，解析，内部ts文件下载，合并
+ * @usage m3u8文件下载，解析，解密，内部ts文件下载，合并
  */
 public class M3u8Util {
     private static final String TAG = "M3u8Util";
-    private final String downloadPath;//下载文件放置位置
-    private final String tempPath;//m3u8 文件缓存位置
-    private String m3u8Name;//m3u8 链接后部名称
 
     private Context context;
     @SuppressLint("StaticFieldLeak")
@@ -39,10 +49,19 @@ public class M3u8Util {
     private static final long TIME_OUT_10S = 10*1000L;
     private static final long TIME_OUT_5M = 5*60*1000L;
 
+    private static final String ALGORITHM = "AES";//加密/解密算法名称
+    private static final String IV_STRING = "0000000000000000";//解密偏移量
+
+    private final String downloadPath;//下载文件放置位置
+    private final String tempPath;//m3u8 文件缓存位置
+    private String m3u8Name;//m3u8 链接后部名称
+    private String keyValue;//密钥
+
     private M3u8Util(Context context){
         this.context = context;
         downloadPath = FileUtil.getAppRootPth(context) + File.separator + Constants.DIR_M3U8;
         tempPath = downloadPath + File.separator + "temp";
+        keyValue = null;
     }
 
     public static M3u8Util getInstance(Context context){
@@ -69,7 +88,7 @@ public class M3u8Util {
             File tempDir = new File(tempPath);
             if (tempDir.exists()) {
                 // 清空内部文件
-                FileUtil.deleteDir(tempPath);
+                FileUtil.delFileAndDir(tempPath);
             }else{
                 tempDir.mkdirs();
             }
@@ -86,6 +105,19 @@ public class M3u8Util {
             //解析m3u8文件
             Log.i(TAG, "downloadM3u8: 开始解析");
             M3U8 m3U8 = parseM3u8File(tempPath, m3u8Name, m3u8Url);
+
+            //获取密钥，如果有的话
+            String keyUrl = m3U8.getKeyUrl();
+            if(keyUrl!=null) {
+                if(!keyUrl.contains("com")) {
+                    if(!keyUrl.contains("/")) {
+                        keyUrl = m3U8.getUrlRefer() + keyUrl;
+                    }else{
+                        keyUrl = m3U8.getUrlHead() + keyUrl;
+                    }
+                }
+                getKey(keyUrl);
+            }
 
             //下载片段
             Log.i(TAG, "downloadM3u8: 开始下载片段中..");
@@ -105,7 +137,7 @@ public class M3u8Util {
             Log.i(TAG, "downloadM3u8: 合并完成！");
 
             //删除缓存文件
-            FileUtil.deleteDir(tempPath);
+            FileUtil.delFileAndDir(tempPath);
             out = 1;
             SystemUtil.showToast(context, "下载完成！");
         }else {
@@ -127,10 +159,7 @@ public class M3u8Util {
             try {
                 inputStream = (new URL(m3u8Url)).openStream();
                 FileOutputStream outputStream = new FileOutputStream(new File(tempPath, m3u8Name));
-                FileUtil.readerWriterStream(inputStream, outputStream);
-
-                inputStream.close();
-                outputStream.close();
+                readerWriterStream(inputStream, outputStream);
                 Log.i(TAG, "downloadM3u8: m3u8文件下载完成");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -139,6 +168,59 @@ public class M3u8Util {
 
         Log.i(TAG, "downloadM3u8: 下载m3u8文件");
         executor.submit(rM3u8Task);
+    }
+
+    //通过key链接获取key值
+    private void getKey(String url) {
+        // TODO Auto-generated method stub
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                StringBuffer sb = new StringBuffer();
+                BufferedReader bf = null;
+                InputStreamReader isr = null;
+                try {
+                    // 创建网络连接
+                    URL url1 = new URL(url);
+                    // 打开网络
+                    URLConnection uc = url1.openConnection();
+                    // 建立文件输入流
+                    isr = new InputStreamReader(uc.getInputStream(), "utf-8");
+                    // 高效率读取
+                    bf = new BufferedReader(isr);
+                    // 下载页面源码
+
+                    String temp;
+                    while ((temp = bf.readLine()) != null) {
+                        sb.append(temp.trim());
+                    }
+
+                    keyValue = sb.toString();
+                    Log.i(TAG, "key: " + keyValue);
+                } catch (MalformedURLException e) {
+                    System.out.println("网页打开失败，请重新输入网址。");
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    System.out.println("网页打开失败,请检查网络。");
+                    e.printStackTrace();
+                } finally {
+                    if (bf != null) {
+                        try {
+                            bf.close();
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        try {
+                            isr.close();
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -190,12 +272,12 @@ public class M3u8Util {
                     if (!(line.toLowerCase().startsWith("http://") || line.toLowerCase().startsWith("https://"))) {
                         // 不是使用http协议的
                         // /20200531/B9bXVPnl/600kb/hls/index.m3u8
-                        String head = PathUtil.getUrlHead(url);
+                        String head = SuffixUtil.getUrlHead(url);
                         newUrl = head + line;
                     } else {
                         newUrl = line;
                     }
-                    String m3u8Name2 = ConvertUtil.string2Hex(String.valueOf(DateUtil.getCurTimeLong())) + ".m3u8";
+                    String m3u8Name2 = ConvertUtil.string2Hex(String.valueOf(TimeUtil.getCurTimeLong())) + ".m3u8";
                     // 获取远程文件
                     cacheM3u8File(newUrl);
                     // 进行递归获取数据
@@ -235,11 +317,32 @@ public class M3u8Util {
 
         for (M3U8Ts ts : m3u8.getTsList()) {
             Runnable runnable = () -> {
-                FileOutputStream writer;
                 try {
-                    writer = new FileOutputStream(new File(dir, ts.getContent()));
-                    FileUtil.readerWriterStream(new URL(m3u8.getUrlRefer() + ts.getContent()).openStream(), writer);
-                } catch (IOException e) {
+                    String name = ts.getContent();
+                    String url;
+                    if(name.contains("/")) {
+                        name = name.substring(name.lastIndexOf("/")+1);
+                        url = m3u8.getUrlHead() + ts.getContent();
+                    }else {
+                        url = m3u8.getUrlRefer() +  "/" + ts.getContent();
+                    }
+
+                    FileOutputStream writer = new FileOutputStream(new File(dir, name));
+                    InputStream input;
+                    try {
+                        input = new URL(url).openStream();
+                        if(keyValue==null) {
+                            readerWriterStream(input, writer);
+                        }else {
+                            //解密
+                            readerWriterDeCrypto(input, writer);
+                        }
+                    }catch (IOException e) {
+                        // TODO: handle exception
+//							e.printStackTrace();
+                        //下载失败的文件直接跳过
+                    }
+                } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
             };
@@ -247,9 +350,80 @@ public class M3u8Util {
         }
     }
 
+    //将网络流写入到本地
+    private void readerWriterStream(InputStream input, FileOutputStream output) {
+        byte[] buffer = new byte[1024];
+        try {
+            while (true) {
+                int length;
+                if ((length = input.read(buffer)) == -1) {
+                    break;
+                }
+                output.write(buffer, 0, length);
+            }
+        }catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            try {
+                input.close();
+                output.flush();
+                output.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //将网络流写入到本地（解密）
+    private void readerWriterDeCrypto(InputStream input, FileOutputStream writer) {
+        // TODO Auto-generated method stub
+        byte[] buffer = new byte[1024];
+        try {
+            int size=-1;
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            while((size=input.read(buffer,0,buffer.length))!=-1) {
+                byteArrayOutputStream.write(buffer,0,size);
+            }
+            input.close();
+            byte[] bytes = byteArrayOutputStream.toByteArray();
+            byteArrayOutputStream.close();
+            writer.write(aesDecry(bytes, keyValue));  // 最后需要收尾
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            try {
+                input.close();
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //AES 解密算法
+    private byte[] aesDecry(byte[] contentByte, String key)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException,
+            BadPaddingException, InvalidAlgorithmParameterException {
+        byte[] keyByte = key.getBytes();
+        // 初始化一个密钥对象
+        SecretKeySpec keySpec = new SecretKeySpec(keyByte, ALGORITHM);
+        // 初始化一个初始向量,不传入的话，则默认用全0的初始向量
+        byte[] initParam = IV_STRING.getBytes();
+        IvParameterSpec ivSpec = new IvParameterSpec(initParam);
+        // 指定加密的算法、工作模式和填充方式
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+        return cipher.doFinal(contentByte);
+    }
+
     // 合并文件
     private void mergeTsFile(M3U8 m3u8, String outDir){
-        String saveName = DateUtil.getCurTimeDate().toString() + ".mp4";
+        String saveName = TimeUtil.getCurTimeDate().toString() + ".mp4";
         String savePath = outDir + File.separator + saveName;
         File file = new File(savePath);
 
@@ -282,15 +456,19 @@ public class M3u8Util {
                     e.printStackTrace();
                 }finally {
                     try {
-                        input.close();
+                        if(input!=null){
+                            input.close();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             } else {
                 try {
-                    output.flush();
-                    output.close();
+                    if(output!=null){
+                        output.flush();
+                        output.close();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -298,8 +476,10 @@ public class M3u8Util {
             }
         }
         try {
-            output.flush();
-            output.close();
+            if(output!=null){
+                output.flush();
+                output.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -22,12 +22,16 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * @author nepalese on 2021/5/17 09:45
- * @usage 加密解密算法：AES, MD5
+ * @usage 加密解密算法：Hex, AES, MD5
+ * 1. 十六进制加密、解密；（1个字符两个16制表示）
+ * 2. MD5加密；（Message-Digest Algorithm 5（信息-摘要算法), 把一个任意长度的字节串变换成一定长的大整数）
+ * 3. AES字符、文件加密、解密；（高级加密标准（Advanced Encryption Standard））
  */
-public class CryptUtil {
+public class EncryptUtil {
     private static final char[] DIGITS_HEX = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
     private static final String ALGORITHM_AES = "AES";
     private static final String ALGORITHM_MD5 = "MD5";
+    private static final String ALGORITHM_SHA = "SHA1PRNG";
     private static final int KEY_SIZE = 128;
 
     //1. Hex：1个字符两个16制表示
@@ -49,8 +53,8 @@ public class CryptUtil {
 
     /**
      * 十六进制解密
-     * @param hex
-     * @return
+     * @param hex 十六进制密文
+     * @return 字符串
      */
     public static String hexDeCrypt(String hex) {
         /*兼容带有\x的十六进制串*/
@@ -105,7 +109,7 @@ public class CryptUtil {
         return hex.toString();
     }
 
-    //3. AES: 级加密标准（Advanced Encryption Standard）
+    //3. AES: 高级加密标准（Advanced Encryption Standard）
     /**
      * 1. 迭代的、对称密钥分组的密码，它可以使用128、192 和 256 位密钥；
      * 2. 用 128 位（16字节）分组加密和解密数据；
@@ -144,7 +148,7 @@ public class CryptUtil {
      * @return
      */
     public static String aesDecryptStr(String str, String key) {
-        if (str.isEmpty() || str.length() < 1)
+        if (str==null || str.isEmpty())
             return null;
 
         byte[] buffer = new byte[str.length() / 2];
@@ -197,9 +201,13 @@ public class CryptUtil {
             e.printStackTrace();
         }finally {
             try {
-                inputStream.close();
-                outputStream.flush();
-                outputStream.close();
+                if(inputStream!=null){
+                    inputStream.close();
+                }
+                if(outputStream!=null){
+                    outputStream.flush();
+                    outputStream.close();
+                }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -209,7 +217,7 @@ public class CryptUtil {
 
     //生成安全密钥
     private static SecretKeySpec generateSecretKey(String key) throws NoSuchAlgorithmException {
-        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+        SecureRandom secureRandom = SecureRandom.getInstance(ALGORITHM_SHA);
         secureRandom.setSeed(key.getBytes(StandardCharsets.UTF_8));
         KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM_AES);
         kgen.init(KEY_SIZE, secureRandom);

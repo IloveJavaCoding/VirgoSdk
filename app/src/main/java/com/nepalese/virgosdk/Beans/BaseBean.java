@@ -1,5 +1,7 @@
 package com.nepalese.virgosdk.Beans;
 
+import android.os.Parcelable;
+
 import com.nepalese.virgosdk.Util.JsonUtil;
 
 import java.io.Serializable;

@@ -13,25 +13,26 @@ import com.nepalese.virgosdk.Beans.AppInfo;
 
 /**
  * @author nepalese on 2020/11/18 10:43
- * @usage 安装包信息: 包名，版本名，版本号
+ * @usage 安装包信息：包名，版本名，版本号
+ *
  */
-public class ApkInfoUtil {
-    private static final String TAG = "ApkInfoUtil";
+public class PackageUtil {
+    private static final String TAG = "PackageUtil";
 
-    private static volatile ApkInfoUtil instance;
+    private static volatile PackageUtil instance;
     private final PackageManager packageManager;
     private Context context;
 
-    private ApkInfoUtil(Context context) {
+    private PackageUtil(Context context) {
         this.context = context;
         this.packageManager = context.getPackageManager();
     }
 
-    public static ApkInfoUtil getInstance(Context context) {
+    public static PackageUtil getInstance(Context context) {
         if(instance==null){
-            synchronized (ApkInfoUtil.class){
+            synchronized (PackageUtil.class){
                 if(instance==null){
-                    instance = new ApkInfoUtil(context);
+                    instance = new PackageUtil(context);
                 }
             }
         }

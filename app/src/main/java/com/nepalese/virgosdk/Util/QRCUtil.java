@@ -1,4 +1,4 @@
-package com.nepalese.virgosdk.Helper;
+package com.nepalese.virgosdk.Util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,18 +18,18 @@ import java.util.Map;
 
 /**
  * @author nepalese on 2020/11/18 09:40
- * @usage 生成二维码
+ * @usage 生成二维码（中间可添加自定义图标）
  * lib: implementation 'com.google.zxing:core:3.2.1'
  */
-public class QRCHelper {
-    private static final String TAG = "QRCHelper";
+public class QRCUtil {
+    private static final String TAG = "QRCUtil";
 
     /**
      * 生成二维码
      * @param content:  需转译内容
-     * @param width： 返回bitmap宽度
-     * @param height： 返回bitmap高度
-     * @param logoBm:  添加到二维码中间的logo， 为null时即不添加
+     * @param width：   返回bitmap宽度
+     * @param height：  返回bitmap高度
+     * @param logoBm:   添加到二维码中间的logo， 为null时即不添加
      * @return Bitmap
      */
     public static Bitmap generateQRC(String content, int width, int height, Bitmap logoBm) {

@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
  * @author nepalese on 2021/3/1 16:48
  * @usage 顶部状态栏，底部导航栏控制
  */
-public class WinowUtil {
+public class UIUtil {
     /**
      * 修改状态栏内容颜色为黑: 在setContentView()之前调用
      * @param activity

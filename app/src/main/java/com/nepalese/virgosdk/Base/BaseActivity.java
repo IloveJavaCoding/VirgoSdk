@@ -36,6 +36,9 @@ public class BaseActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * 隐藏弹框
+     */
     public void hideDialog(){
         if(dialog!=null){
             dialog.dismiss();

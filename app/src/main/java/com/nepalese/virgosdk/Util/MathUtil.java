@@ -4,15 +4,23 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.IntRange;
+
 /**
  * @author nepalese on 2020/11/18 11:30
- * @usage 数学计算：随机数，设置精度，数据校验（异或，CRC)
+ * @usage 数学计算：
+ * 1. 随机数；
+ * 2. 设置精度；
+ * 3. 算法：
+ *      byte相加，
+ * 4. 数据校验（异或，CRC)；
+ *
  */
 public class MathUtil {
-    //get random number
+    //==========================================随机数===============================================
 
     /**
-     * 获取[a,b)之间随机数
+     * 获取[a,b)之间随机数 double
      * @param a
      * @param b
      * @return double
@@ -22,7 +30,7 @@ public class MathUtil {
     }
 
     /**
-     * 获取[a,b)之间随机数
+     * 获取[a,b)之间随机数 int
      * @param a
      * @param b
      * @return int
@@ -31,43 +39,8 @@ public class MathUtil {
         return (int) (Math.random() * (b - a)) + a;
     }
 
-
     /**
-     * 在指定范围内获取指定个数随机数：int
-     * @param min
-     * @param max
-     * @param num
-     * @return
-     */
-    public static List<Integer> getCountRandom(int min, int max, int num){
-        if(num>(max-min))
-            return null;
-
-        if(num<1)
-            return null;
-
-        List<Integer> out  = new ArrayList<>();
-        do {
-            int random = getRandomInt(min, max);
-            boolean hasExist = false;
-            for (int i : out) {
-                if (random == i) {
-                    hasExist = true;
-                    break;
-                }
-            }
-
-            if (!hasExist) {
-                out.add(random);
-            }
-
-        } while (out.size() < num);
-        return out;
-    }
-
-
-    /**
-     * 获取[a,b)内处c外随机数
+     * 获取[a,b)内除c外随机数
      * @param a
      * @param b
      * @param c
@@ -76,47 +49,99 @@ public class MathUtil {
     private int getRandom(int a, int b, int c){
         if(a>b)
             return -1;
-        int d = (int)(Math.random()*(b-a)+a);
-        if(d!=c){
-            return d;
-        }else{
-            return getRandom(a,b,c);
-        }
+        int d = getRandomInt(a,b);
+        return d==c?getRandom(a,b,c):d;
     }
 
-    //设置精度
+    /**
+     * 在范围内获取指定个数随机数：int
+     * @param a         最小值
+     * @param b         最大值
+     * @param num       个数(>0)
+     * @param unique    是否唯一
+     * @return
+     */
+    public static List<Integer> getRandoms(int a, int b, @IntRange(from = 1, to = Integer.MAX_VALUE) int num, boolean unique){
+        //1. 唯一时，个数需大于范围
+        if(unique){
+            if(num>(b-a))
+                return null;
+        }
+
+        List<Integer> out  = new ArrayList<>();
+        do {
+            int random = getRandomInt(a, b);
+            if(unique){
+                boolean hasExist = false;
+                for (int i : out) {
+                    if (random == i) {
+                        hasExist = true;
+                        break;
+                    }
+                }
+
+                if (!hasExist) {
+                    out.add(random);
+                }
+            }else{
+                out.add(random);
+            }
+        } while (out.size() < num);
+        return out;
+    }
+
+    //==========================================设置精度=============================================
+    /**
+     * 设置精度 double
+     * @param value
+     * @param scale
+     * @return
+     */
     public static double setNumberScale(double value, int scale) {
         BigDecimal bd = new BigDecimal(value);
         return bd.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
+    /**
+     * 设置精度 float
+     * @param value
+     * @param scale
+     * @return
+     */
     public static String setNumberScale(float value, int scale) {
         String format = "%." + scale + "f";
         return String .format(format, value);
     }
 
-
+    //============================================算法==============================================
     /**
      * 计算由2Byte组成的数据长度(高位在前)
-     * @param b1
-     * @param b2
-     * @return
+     * @param b1    高位
+     * @param b2    低位
+     * @return      和
      */
-    private int getDataLength(byte b1, byte b2) {
+    public static int sumBytes(byte b1, byte b2) {
 //        int temp1 = b1 << 8 & 0xffff;
 //        int temp2 = b2 & 0xff;
 //        return temp1 + temp2;
         return (b1 << 8 & 0xffff) | (b2 & 0xff);
     }
 
+    //todo 质数，
+    //=========================================数据校验==============================================
     /**
-     * 异或校验 最后两位为校验值
+     * 异或校验
      * @param data 全部数据
-     * @return 校验结果
+     * @param len  校验值长度
+     * @return byte 校验结果(-1:无效）
      */
-    private byte getXor(byte[] data) {
+    public static byte getXor(byte[] data, int len) {
+        if(data==null || data.length<len){
+            return -1;
+        }
+
         byte temp = data[0];
-        for (int i = 1; i < data.length - 2; i++) {
+        for (int i = 1; i < data.length - len; i++) {
             temp ^= data[i];
         }
         return temp;
@@ -124,13 +149,13 @@ public class MathUtil {
 
     /**
      * CRC 参与校验的字段为校验值之前的所有数据，/低位在前
-     * @param data
-     * @param length
-     * @return
+     * @param data  全部数据
+     * @param len   校验值长度
+     * @return int
      */
-    private int crcCheck(byte[] data, int length) {
+    public static int crcCheck(byte[] data, int len) {
         int TxCRC16 = 0;
-        for (int i = 0; i < length-2; i++) {
+        for (int i = 0; i < data.length-len; i++) {
             TxCRC16 = (CRC16table[(data[i] ^ (TxCRC16 & 0xff)) & 0xff] ^ (TxCRC16 / 0x100)) & 0xffff;
         }
 
@@ -139,7 +164,7 @@ public class MathUtil {
         return TxCRC16;
     }
 
-    private final int[] CRC16table = {
+    private static final int[] CRC16table = {
             0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
             0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
             0xCC01, 0x0CC0, 0x0D80, 0xCD41, 0x0F00, 0xCFC1, 0xCE81, 0x0E40,

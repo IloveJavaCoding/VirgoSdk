@@ -3,7 +3,6 @@ package com.nepalese.virgosdk.Util;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
-import android.text.TextUtils;
 
 import com.nepalese.virgosdk.Manager.RuntimeExec;
 
@@ -20,17 +19,21 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 /**
  * @author nepalese on 2020/10/18 10:40
- * @usage 文件，文件夹：增删改查，复制，移动，重命名， 存储路径获取， 文件编码方式判断
+ * @usage
+ * 1. 路径：
+ *      设备外部存储根目录，apk安装根目录，内部存储根目录，apk内部存储根目录；
+ * 2. 文件，文件夹：
+ *      增删改查，文件夹下文件个数，
+ *      内容读写，重命名，复制，移动
+ *      文件编码方式判断
  */
 public class FileUtil {
     private static final String TAG = "FileUtil";
 
-    //==================================get external file path======================================
+    //==========================================获取路径=============================================
     /**
      * 获取设备外部存储根目录：
      * @return /storage/emulated/0
@@ -57,7 +60,7 @@ public class FileUtil {
     }
 
     /**
-     * apk 内部存储艮目录
+     * apk 内部存储根目录
      * @param context
      * @return /data/user/0/packname/files
      */
@@ -65,15 +68,15 @@ public class FileUtil {
         return context.getFilesDir().getAbsolutePath();
     }
 
-    //=====================================create file/dir==========================================
+    //=========================================创建文件、夹==========================================
     /**
      * 创建文件
      * @param path 路径
      * @param fileName 文件名
-     * @return
+     * @return 是否创建成功
      */
     public static boolean createFile(String path, String fileName){
-        File file = new File(path+"/"+fileName);
+        File file = new File(path+File.separator+fileName);
 
         if(!file.exists()){
             try {
@@ -87,8 +90,8 @@ public class FileUtil {
 
     /**
      * 创建文件夹
-     * @param folder
-     * @return
+     * @param folder 文件夹路径（可多层）
+     * @return 是否创建成功
      */
     public static boolean createDirs(String folder){
         File file = new File(folder);
@@ -99,81 +102,68 @@ public class FileUtil {
         return false;
     }
 
-
-    //==========================================delete file/dir=====================================
+    //==========================================删除文件、夹=========================================
     /**
-     * 删除文件夹（及内部文件）
-     * @param dir
-     * @return
+     * 删除文件或文件夹（及里面的所有内容）
+     * @param path 文件、夹路径
+     * @return 是否成功删除（目标不存在也相当于删除成功）
      */
-    public static boolean deleteDir(String dir){
-        File file = new File(dir);
-        if(file.exists()){
-            return deleteDirWithFile(file);
-        }
-        return false;
+    public static boolean delFileAndDir(String path) {
+        File file = new File(path);
+        return delFileAndDir(file);
     }
 
-    private static boolean deleteDirWithFile(File file) {
-        if(!file.isDirectory() || !file.exists()) {
-            return false;
-        }
-        if(file.list().length>0){
-            for(File f : file.listFiles()){
-                if(f.isFile()){
-                    f.delete();//delete all files
-                }else if(f.isDirectory()){
-                    deleteDirWithFile(f);
+    /**
+     * 删除文件或文件夹（及里面的所有内容）
+     * @param file 文件、夹对象
+     * @return 是否成功删除（目标不存在也相当于删除成功）
+     */
+    public static boolean delFileAndDir(File file) {
+        if(file.exists()){
+            if(file.isFile()){//文件
+                return file.delete();
+            }else{//文件夹
+                File[] temp = file.listFiles();
+                if(temp!=null && temp.length>0){
+                    for(File f : temp){
+                        delFileAndDir(f);
+                    }
                 }
+                //删除空文件夹
+                return file.delete();
             }
         }
-
-        return file.delete();
+        return true;
     }
 
     /**
-     * 删除文件
-     * @param path
-     * @return
+     * 强制性删除文件或文件夹：命令行
+     * @param path 文件路径
      */
-    public static boolean deleteFile(String path){
-        File file = new File(path);
-        if(file.exists()&&file.isFile()){
-            return file.delete();
-        }
-
-        return false;
-    }
-
-    /**
-     * 强制性删除
-     * @param path
-     */
-    public void deleteForce(String path) {
+    public static void deleteForce(String path) {
         RuntimeExec.getInstance().executeCommand("rm -rf " + path);
     }
 
-    //=====================================change file/dir name=====================================
+    //======================================文件、文件夹重命名========================================
     /**
      * 文件、文件夹重命名
-     * @param path
-     * @param oldName
-     * @param newName
-     * @return
+     * @param path 文件、文件夹父路径
+     * @param oldName 原名
+     * @param newName 新名
+     * @return 是否重命名成功
      */
-    public static boolean changeFileDirName(String path, String oldName, String newName){
-        File oldFile = new File(path+"/"+oldName);
-        File newFile = new File(path+"/"+newName);
+    public static boolean renameFileOrDir(String path, String oldName, String newName){
+        File oldFile = new File(path+File.separator+oldName);
+        File newFile = new File(path+File.separator+newName);
 
         return oldFile.renameTo(newFile);
     }
 
-
-    //====================================get file/dir info=========================================
+    //====================================获取文件夹下文件信息========================================
     /**
-     * 获取文件夹下文件个数（不深究）
-     * @param dir
-     * @return
+     * 获取文件夹下文件个数（不深究,仅第一层）
+     * @param dir 文件夹路径
+     * @return 文件个数
      */
     public static int getFilesNumber(String dir){
         File file = new File(dir);
@@ -184,18 +174,17 @@ public class FileUtil {
             return 1;
         }
 
-        return Objects.requireNonNull(file.listFiles()).length;
-    }
-    
-    public static String[] getFilesList(String dir){
-        File file = new File(dir);
-        return file.list();
+        String[] list = file.list();
+        if(list==null){
+            return 0;
+        }
+        return list.length;
     }
 
     /**
      * 获取某个文件夹下所有文件（包括子文件夹内）个数
-     * @param dir
-     * @return
+     * @param dir 文件夹路径
+     * @return 所有文件个数
      */
     public static int getAllFileNumbers(String dir){
         File file = new File(dir);
@@ -226,15 +215,15 @@ public class FileUtil {
         }
     }
 
-    //====================================read and write content====================================
+    //===========================================内容读写============================================
     /**
-     * 将string写入到文件
-     * @param content
-     * @param path
-     * @param fileName
+     * 将string写入到文件（若文件存在，则重置）
+     * @param content   内容
+     * @param path      存储路径
+     * @param fileName  文件名
      */
     public static void writeToFile(String content, String path, String fileName){
-        File file = new File(path+fileName);
+        File file = new File(path + File.separator + fileName);
         if(!file.exists()){
             createFile(path, fileName);
         }
@@ -242,7 +231,7 @@ public class FileUtil {
         RandomAccessFile randomAccessFile;
         try {
             randomAccessFile = new RandomAccessFile(file, "rw");
-            randomAccessFile.seek(0);//rewrite
+            randomAccessFile.seek(0);//重置
             randomAccessFile.write(content.getBytes());
 
             randomAccessFile.close();
@@ -253,8 +242,8 @@ public class FileUtil {
 
     /**
      * 将bytes写入到文件中
-     * @param bytes
-     * @param outputFilePath
+     * @param bytes             字节流
+     * @param outputFilePath    存储位置（包含名字）
      */
     public static void writeByte2File(byte[] bytes, String outputFilePath) {
         BufferedOutputStream outputStream = null;
@@ -268,6 +257,7 @@ public class FileUtil {
         } finally {
             if (outputStream != null) {
                 try {
+                    outputStream.flush();
                     outputStream.close();
                 } catch (IOException e1) {
                     e1.printStackTrace();
@@ -278,82 +268,42 @@ public class FileUtil {
 
     /**
      * 读取文件(文本）
-     * @param path
-     * @param format 文件编码方式（默认utf-8）
-     * @return 字符串
+     * @param path      文件路径
+     * @param format    文件编码方式（默认utf-8）
+     * @return          字符串
      */
-    public static String readFile2String(String path, String format){
-        if(format==null){
-            format = "utf-8";
-        }
-
+    public static String readTxtFile(String path, String format){
         File file = new File(path);
         if(!file.exists()){
             return null;
         }
 
         FileInputStream inputStream = null;
-        try {
+        try{
             inputStream = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
+        }catch (FileNotFoundException e){
             e.printStackTrace();
         }
 
-        InputStreamReader inputStreamReader = null;
-        try {
-            inputStreamReader = new InputStreamReader(inputStream, format);//'utf-8' 'GBK'
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-        StringBuilder builder = new StringBuilder();
-        String line;
-        try {
-            while((line=reader.readLine())!=null){
-                builder.append(line);
-                builder.append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return builder.toString();
+        return getString(inputStream, format);
     }
 
     /**
      * 读取资源内的文本文件
      * @param context
-     * @param id
-     * @param format
-     * @return
+     * @param id        资源id
+     * @param format    文件编码方式（默认utf-8）
+     * @return          字符串
      */
-    public static String readResource2String(Context context, int id, String format){
+    public static String readTxtResource(Context context, int id, String format){
         InputStream inputStream = context.getResources().openRawResource(id);
-        InputStreamReader inputStreamReader = null;
-        try {
-            inputStreamReader = new InputStreamReader(inputStream, format);//'utf-8' 'GBK'
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-        StringBuilder builder = new StringBuilder();
-        String line;
-        try {
-            while((line=reader.readLine())!=null){
-                builder.append(line);
-                builder.append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return builder.toString();
+        return getString(inputStream, format);
     }
 
     /**
      * 读取文件 返回文件流
-     * @param path
-     * @return byte[]
+     * @param path      文件路径
+     * @return byte[]   字节流
      */
     public static byte[] readFile2Bytes(String path){
         File file = new File(path);
@@ -370,7 +320,7 @@ public class FileUtil {
             }
 
             byte[] bytes = new byte[inputStream.available()];
-            inputStream.read(bytes);//the total number of bytes read into the buffer,
+            inputStream.read(bytes);//return the total number of bytes read into the buffer,
 
             return bytes;
         } catch (IOException e) {
@@ -385,7 +335,7 @@ public class FileUtil {
      * @param input
      * @param output
      */
-    public static void readerWriterStream(InputStream input, FileOutputStream output) {
+    public static void inputOutputStream(InputStream input, FileOutputStream output) {
         byte[] buffer = new byte[1024];
         try {
             while (true) {
@@ -410,11 +360,54 @@ public class FileUtil {
 
     /**
      * 将输入流转换为字符串
-     * @param inStream
-     * @param format
-     * @return
+     * @param inputStream   输入流
+     * @param format        文件编码方式（默认utf-8）
+     * @return              字符串
      */
-    public static String parseStream2Str(InputStream inStream, String format){
+    public static String getString(InputStream inputStream, String format) {
+        if(format==null){
+            format = "utf-8";
+        }
+        InputStreamReader inputStreamReader = null;
+        try {
+            inputStreamReader = new InputStreamReader(inputStream, format);//'utf-8' 'GBK'
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        StringBuilder builder = new StringBuilder();
+        String line;
+        try {
+            while((line=reader.readLine())!=null){
+                builder.append(line);
+                builder.append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(inputStream!=null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
+     * 将输入流转换为字符串
+     * @param inStream  输入流
+     * @param format    文件编码方式（默认utf-8）
+     * @return          字符串
+     */
+    public static String getString2(InputStream inStream, String format){
+        if(format==null){
+            format = "utf-8";
+        }
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
 
@@ -445,11 +438,11 @@ public class FileUtil {
         return out;
     }
 
-    //============================================copy/move file====================================
+    //============================================文件复制、移动=====================================
     /**
      * 复制文件
-     * @param src
-     * @param dest
+     * @param src   目标文件路径
+     * @param dest  复制后路径
      */
     public static void copyFile(String src, String dest){
         byte[] bytes = readFile2Bytes(src);
@@ -497,7 +490,11 @@ public class FileUtil {
         RuntimeExec.getInstance().executeCommand(RuntimeExec.CP + src + " " + dest);
     }
 
-    //需root权限
+    /**
+     * 需root权限
+     * @param src
+     * @param dest
+     */
     public static void copyForce(String src, String dest){
         RuntimeExec.getInstance().executeRootCommand(RuntimeExec.CP + src + " " + dest);
     }
@@ -509,18 +506,18 @@ public class FileUtil {
      */
     public static void moveFile(String src, String dest){
         copyFile(src, dest);
-        deleteFile(src);
+        delFileAndDir(src);
     }
 
     //======================================文件编码类型：gbk ? utf-8================================
     /**
      * 判断文件编码格式是否为 utf-8
-     * @param file
+     * @param path 文件路径
      * @return
      */
-    public static Boolean isUtf8(File file) {
+    public static Boolean isUtf8(String path) {
         boolean isUtf8 = true;
-        byte[] buffer = FileUtil.readFile2Bytes(file.getPath());
+        byte[] buffer = FileUtil.readFile2Bytes(path);
         assert buffer != null;
         int end = buffer.length;
         for (int i = 0; i < end; i++) {
@@ -552,9 +549,9 @@ public class FileUtil {
         return isUtf8;
     }
 
-    public static Boolean isGbk(File file) {
+    public static Boolean isGbk(String path) {
         boolean isGbk = true;
-        byte[] buffer = FileUtil.readFile2Bytes(file.getPath());
+        byte[] buffer = FileUtil.readFile2Bytes(path);
         assert buffer != null;
         int end = buffer.length;
         for (int i = 0; i < end; i++) {

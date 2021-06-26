@@ -10,8 +10,8 @@ import java.util.Locale;
  * @author nepalese on 2020/10/13 10:22
  * @usage 时间日期：获取，格式转换，
  */
-public class DateUtil {
-    private static final String TAG = "DateUtil";
+public class TimeUtil {
+    private static final String TAG = "TimeUtil";
 
     public static final String DATE_FORMAT_BASE = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_FORMAT_12 = "yyyy-MM-dd hh:mm:ss EEEE a";

@@ -1,10 +1,12 @@
-package com.nepalese.virgosdk.Util;
+package com.nepalese.virgosdk.Other;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Message;
 import android.util.Log;
+
+import com.nepalese.virgosdk.Util.BitmapUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;

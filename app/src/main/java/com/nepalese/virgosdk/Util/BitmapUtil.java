@@ -31,21 +31,29 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @author nepalese on 2020/10/10 10:41
- * @usage  bitmap 与 drawable, String, byte[] 互转, 从资源文件，本地文件读取bitmap，将bitmap存储到本地文件
- * bitmap 操作：压缩，旋转，（圆形）裁剪，缩放，模糊，透明 ...
+ * @usage
+ * 1. bitmap 数据类型转换：
+ *      drawable <--> Bitmap;
+ *      byte[] <--> Bitmap;
+ *      string <--> bitmap;
+ * 2. bitmap 读取(res\file)与存储：
+ * 3. bitmap 调控：
+ *      反转图片 :把每个像素点的每个rgb值都与255相减（alpha的值不改变）；
+ *      转灰度图(灰阶图)；
+ *      将图片转ASCII码字符:返回ASCII码图，字符串；
+ *      设置图片效果，根据色调，饱和度，亮度来调节图片效果；
+ *      合并两个Bitmap；
+ * 4. bitmap 操控：
+ *      质量压缩，旋转，裁剪，伸缩，高斯模糊，透明；
+ *
  */
 public class BitmapUtil {
     private static final String TAG = "BitmapUtil";
 
-    public static enum ScaleType {
+    public enum ScaleType {
         NORMAL, HORIZONTAL, VERTICAL
     }
 
@@ -118,7 +126,7 @@ public class BitmapUtil {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
-    //string <--> bitma
+    //string <--> bitmap
     /**
      * bitmap 转 string
      * @param bitmap
@@ -193,7 +201,6 @@ public class BitmapUtil {
         return bitmap;
     }
 
-
     //======================================bitmap 存储=============================================
     /**
      * 存储Bitmap到本地, 若文件存在则会先删除，再创建新的
@@ -217,7 +224,6 @@ public class BitmapUtil {
             e.printStackTrace();
         }
     }
-
 
     //========================================bitmap 调控============================================
     /**
@@ -385,6 +391,73 @@ public class BitmapUtil {
         return outBitmap;
     }
 
+    /**
+     * 设置图片效果，根据色调，饱和度，亮度来调节图片效果, 会创建新图
+     * @param bitmap:要处理的图像
+     * @param hue:色调
+     * @param saturation:饱和度
+     * @param lightness:亮度
+     */
+    public static Bitmap bitmapEffect(Bitmap bitmap, float hue, float saturation, float lightness) {
+        hue = hue < -180.0f ? -180.0f : Math.min(hue, 180.0f);
+        saturation = saturation < 0.0f ? 0.0f : Math.min(saturation, 2.0f);
+        lightness = lightness < 0.0f ? 0.0f : Math.min(lightness, 2.0f);
+
+        Bitmap bmp = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bmp);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        ColorMatrix hueMatrix = new ColorMatrix();
+        hueMatrix.setRotate(0, hue);    //0代表R，红色
+        hueMatrix.setRotate(1, hue);    //1代表G，绿色
+        hueMatrix.setRotate(2, hue);    //2代表B，蓝色
+
+        ColorMatrix saturationMatrix = new ColorMatrix();
+        saturationMatrix.setSaturation(saturation);
+
+        ColorMatrix lumMatrix = new ColorMatrix();
+        lumMatrix.setScale(lightness, lightness, lightness, 1);
+
+        ColorMatrix imageMatrix = new ColorMatrix();
+        imageMatrix.postConcat(hueMatrix);
+        imageMatrix.postConcat(saturationMatrix);
+        imageMatrix.postConcat(lumMatrix);
+
+        paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+
+        //回收
+        bitmap.recycle();
+        return bmp;
+    }
+
+    /**
+     * 合并两个Bitmap
+     * @param backBitmap
+     * @param frontBitmap
+     * @param width 合成后图的宽
+     * @param height 合成后图的高
+     * @return
+     */
+    public static Bitmap mergeBitmap(Bitmap backBitmap, Bitmap frontBitmap, int width, int height) {
+        if (backBitmap == null || backBitmap.isRecycled()
+                || frontBitmap == null || frontBitmap.isRecycled()) {
+            Log.e(TAG, "backBitmap=" + backBitmap + ";frontBitmap=" + frontBitmap);
+            return null;
+        }
+        Bitmap bitmap = backBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(bitmap);
+        Log.i(TAG, "mergeBitmap: width=" + width + " height=" + height);
+        int leftGap = (width - frontBitmap.getWidth()) / 2;
+        int topGap = (height - frontBitmap.getHeight()) / 2;
+        Log.i(TAG, "mergeBitmap: leftGap=" + leftGap + " topGap=" + topGap);
+        Log.i(TAG, "mergeBitmap: frontBitmap.getWidth()=" + frontBitmap.getWidth() + " frontBitmap.getHeight()=" + frontBitmap.getHeight());
+        Rect baseRect = new Rect(0, 0, frontBitmap.getWidth(), frontBitmap.getHeight());
+        Rect frontRect = new Rect(leftGap, topGap, leftGap + frontBitmap.getWidth(), topGap + frontBitmap.getHeight());
+        canvas.drawBitmap(frontBitmap, baseRect, frontRect, null);
+        return bitmap;
+    }
+
     //=========================================bitmap 操控==========================================
     /**
      * 质量压缩图片方法
@@ -457,7 +530,12 @@ public class BitmapUtil {
         }
     }
 
-    //仅旋转bitmap
+    /**
+     * 仅旋转bitmap
+     * @param bitmap
+     * @param degree
+     * @return
+     */
     public static Bitmap rotateBitmap(Bitmap bitmap, int degree){
         if(degree%360 == 0){
             return bitmap;
@@ -909,73 +987,6 @@ public class BitmapUtil {
     }
 
     //==========================================other===============================================
-    /**
-     * 设置图片效果，根据色调，饱和度，亮度来调节图片效果, 会创建新图
-     * @param bitmap:要处理的图像
-     * @param hue:色调
-     * @param saturation:饱和度
-     * @param lum:亮度
-     */
-    public static Bitmap bitmapEffect(Bitmap bitmap, float hue, float saturation, float lum) {
-        hue = hue < -180.0f ? -180.0f : Math.min(hue, 180.0f);
-        saturation = saturation < 0.0f ? 0.0f : Math.min(saturation, 2.0f);
-        lum = lum < 0.0f ? 0.0f : Math.min(lum, 2.0f);
-
-        Bitmap bmp = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bmp);
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-        ColorMatrix hueMatrix = new ColorMatrix();
-        hueMatrix.setRotate(0, hue);    //0代表R，红色
-        hueMatrix.setRotate(1, hue);    //1代表G，绿色
-        hueMatrix.setRotate(2, hue);    //2代表B，蓝色
-
-        ColorMatrix saturationMatrix = new ColorMatrix();
-        saturationMatrix.setSaturation(saturation);
-
-        ColorMatrix lumMatrix = new ColorMatrix();
-        lumMatrix.setScale(lum, lum, lum, 1);
-
-        ColorMatrix imageMatrix = new ColorMatrix();
-        imageMatrix.postConcat(hueMatrix);
-        imageMatrix.postConcat(saturationMatrix);
-        imageMatrix.postConcat(lumMatrix);
-
-        paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
-        canvas.drawBitmap(bitmap, 0, 0, paint);
-
-        //回收
-        bitmap.recycle();
-        return bmp;
-    }
-
-    /**
-     * 合并两个Bitmap
-     * @param backBitmap
-     * @param frontBitmap
-     * @param width 合成后图的宽
-     * @param height 合成后图的高
-     * @return
-     */
-    public static Bitmap mergeBitmap(Bitmap backBitmap, Bitmap frontBitmap, int width, int height) {
-        if (backBitmap == null || backBitmap.isRecycled()
-                || frontBitmap == null || frontBitmap.isRecycled()) {
-            Log.e(TAG, "backBitmap=" + backBitmap + ";frontBitmap=" + frontBitmap);
-            return null;
-        }
-        Bitmap bitmap = backBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas canvas = new Canvas(bitmap);
-        Log.i(TAG, "mergeBitmap: width=" + width + " height=" + height);
-        int leftGap = (width - frontBitmap.getWidth()) / 2;
-        int topGap = (height - frontBitmap.getHeight()) / 2;
-        Log.i(TAG, "mergeBitmap: leftGap=" + leftGap + " topGap=" + topGap);
-        Log.i(TAG, "mergeBitmap: frontBitmap.getWidth()=" + frontBitmap.getWidth() + " frontBitmap.getHeight()=" + frontBitmap.getHeight());
-        Rect baseRect = new Rect(0, 0, frontBitmap.getWidth(), frontBitmap.getHeight());
-        Rect frontRect = new Rect(leftGap, topGap, leftGap + frontBitmap.getWidth(), topGap + frontBitmap.getHeight());
-        canvas.drawBitmap(frontBitmap, baseRect, frontRect, null);
-        return bitmap;
-    }
-
     /**
      * 读取图片文件的类型，仅图片文件！！！
      * @param file

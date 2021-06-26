@@ -26,8 +26,8 @@ import java.lang.reflect.Method;
  * @author nepalese on 2020/9/4 17:22
  * @usage 有关显示操作： 横竖屏旋转，截屏，屏幕宽高，键盘显隐，亮度调节
  */
-public class ScreenUtil {
-    private static final String TAG = "ScreenUtil";
+public class WindowUtil {
+    private static final String TAG = "WindowUtil";
 
     public static final int ORIENTATION_LANDSCAPE = 0;
     public static final int ORIENTATION_PORTRAIT = 1;

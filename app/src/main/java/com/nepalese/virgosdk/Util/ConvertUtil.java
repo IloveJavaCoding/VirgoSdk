@@ -16,8 +16,14 @@ import java.util.stream.Collectors;
 /**
  * @author nepalese on 2020/11/05 11:23
  * @usage 数据转换：类型，单位
+ * 1. 字符串转数值：float, double, int, long,
+ * 2. 字符串<-->十六进制；
+ * 3. 进制转换：十六进制，十进制，八进制，二进制；
+ * 4. array <--> list;
+ * 5. 单位转换：文件，时间，显示单位，温度；
  */
 
+//todo 进制转换：十六进制，十进制，八进制，二进制；
 public class ConvertUtil {
     //======================================字符串转数值=============================================
     public static float toFloat(String src) {
@@ -77,10 +83,14 @@ public class ConvertUtil {
     }
 
     //=======================================字符串<-->十六进制======================================
-    //字符串转换为16进制字符串
-    public static String string2Hex(String str){
+    /**
+     * 字符串转换为16进制字符串
+     * @param str 字符串
+     * @return
+     */
+    public static String string2Hex(String str) {
         StringBuilder out = new StringBuilder();
-        for(int i=0;i<str.length();i++){
+        for (int i = 0; i < str.length(); i++) {
             int ch = str.charAt(i);
             String temp = Integer.toHexString(ch);
             out.append(temp);
@@ -89,56 +99,57 @@ public class ConvertUtil {
         return out.toString();
     }
 
-    //转换十六进制编码为字符串
-    public static String toStringHex(String str) {
-        if ("0x".equals(str.substring(0, 2)))
-        {
-            str = str.substring(2);
+    /**
+     * 转换十六进制编码为字符串
+     * @param hex 十六进制编码
+     * @return
+     */
+    public static String hex2String(String hex) {
+        if ("0x".equals(hex.substring(0, 2))) {
+            hex = hex.substring(2);
         }
-        byte[] baKeyword = new byte[str.length() / 2];
-        for (int i = 0; i < baKeyword.length; i++)
-        {
-            try
-            {
-                baKeyword[i] = (byte) (0xff & Integer.parseInt(str.substring(
+        byte[] baKeyword = new byte[hex.length() / 2];
+        for (int i = 0; i < baKeyword.length; i++) {
+            try {
+                baKeyword[i] = (byte) (0xff & Integer.parseInt(hex.substring(
                         i * 2, i * 2 + 2), 16));
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        try
-        {
-            str = new String(baKeyword, StandardCharsets.UTF_8);//UTF-16le:Not
-        } catch (Exception e1)
-        {
+        try {
+            hex = new String(baKeyword, StandardCharsets.UTF_8);//UTF-16le:Not
+        } catch (Exception e1) {
             e1.printStackTrace();
         }
-        return str;
+        return hex;
     }
 
 
     //=========================================进制转换==============================================
-    //16 <--> 10
-    public static int hex2Decimal(String hex){
-        int d = 0;
-        //1.系统方法
-        //d = Integer.valueOf(hex,16);
+    /**
+     * 十六进制转十进制 == Integer.valueOf(hex,16);
+     *
+     * @param hex
+     * @return
+     */
+    public static int hex2Decimal(String hex) {
+        int decimal = 0;
 
-        //2. ff -> 255
-        for(int i=0; i<hex.length(); i++){
-            d += char2Int(hex.charAt(i))*(2<<(4*(hex.length()-1)-1));//16^hex.length()-1
+        //ff -> 255
+        for (int i = 0; i < hex.length(); i++) {
+            decimal += char2Int(hex.charAt(i)) * (2 << (4 * (hex.length() - 1) - 1));//16^hex.length()-1
         }
 
-        return d;
+        return decimal;
     }
 
-    private static int char2Int(char c){
-        if(c > 'F'){
+    private static int char2Int(char c) {
+        if (c > 'F') {
             return -1;
         }
-        switch (c){
+        switch (c) {
             case 'F':
                 return 15;
             case 'E':
@@ -156,28 +167,24 @@ public class ConvertUtil {
         }
     }
 
-    private String decimal2Hex2(int a) {
-        String out = Integer.toHexString(a);
-        if(out.length()==1){
-            out = "0" + out;
-        }
-        return out;
-    }
-
-    public static String decimal2Hex(int d){
+    /**
+     * 十进制转十六进制 == Integer.toHexString(decimal);
+     *
+     * @param decimal
+     * @return
+     */
+    public static String decimal2Hex(int decimal) {
         StringBuilder hex = new StringBuilder();
         List<Integer> m = new ArrayList<>();
-        //1.系统方法
-        //hex = Integer.toHexString(d);
 
-        //2. a -> 商; m -> 余;
-        int a = d;
-        while(a>0){
-            m.add(d%16);
-            a = d/16;
+        //a -> 商; m -> 余;
+        int a = decimal;
+        while (a > 0) {
+            m.add(decimal % 16);
+            a = decimal / 16;
         }
 
-        for(int i=m.size()-1; i>=0; i--){
+        for (int i = m.size() - 1; i >= 0; i--) {
             hex.append(int2Str(m.get(i)));
         }
 
@@ -185,10 +192,10 @@ public class ConvertUtil {
     }
 
     private static String int2Str(Integer a) {//<15
-        if(a>15){
+        if (a > 15) {
             return "";
         }
-        switch (a){
+        switch (a) {
             case 15:
                 return "f";
             case 14:
@@ -207,6 +214,7 @@ public class ConvertUtil {
     }
 
 
+
     //============================================array & list======================================
     // int[] 转 List<Integer>
     @RequiresApi(api = Build.VERSION_CODES.N) //24
@@ -214,53 +222,49 @@ public class ConvertUtil {
         return Arrays.stream(data).boxed().collect(Collectors.toList());
     }
 
-    public static List<Integer> intArr2List2(int[] data){
+    /**
+     * int[] 转 List<Integer>
+     *
+     * @param data
+     * @return
+     */
+    public static List<Integer> intArr2List2(int[] data) {
         List<Integer> list = new ArrayList<>();
-        for(int a : data){
+        for (int a : data) {
             list.add(a);
         }
         return list;
     }
 
-    // String[] 转 List<String>
-    public static List<String> strings2List(String[] data){
+    /**
+     * String[] 转 List<String>
+     *
+     * @param data
+     * @return
+     */
+    public static List<String> strings2List(String[] data) {
         return Arrays.asList(data);
     }
 
     //============================================文件单位转换=======================================
+
+    /**
+     * 文件大小单位标准化：默认精度2
+     *
+     * @param size
+     * @return
+     */
     public static String formatFileSize(long size) {
-        long kiloByte = size / 1024;
-        if (kiloByte < 1) {
-            return "0 B";
-        }
-
-        long megaByte = kiloByte / 1024;
-        if (megaByte < 1) {
-            BigDecimal result1 = new BigDecimal(Double.toString(kiloByte));
-            return result1.setScale(2, BigDecimal.ROUND_HALF_UP)
-                    .toPlainString() + " KB";
-        }
-
-        long gigaByte = megaByte / 1024;
-        if (gigaByte < 1) {
-            BigDecimal result2 = new BigDecimal(Double.toString(megaByte));
-            return result2.setScale(2, BigDecimal.ROUND_HALF_UP)
-                    .toPlainString() + " MB";
-        }
-
-        long teraBytes = gigaByte / 1024;
-        if (teraBytes < 1) {
-            BigDecimal result3 = new BigDecimal(Double.toString(gigaByte));
-            return result3.setScale(2, BigDecimal.ROUND_HALF_UP)
-                    .toPlainString() + " GB";
-        }
-
-        BigDecimal result4 = new BigDecimal(teraBytes);
-        return result4.setScale(2, BigDecimal.ROUND_HALF_UP).
-                toPlainString() + " TB";
+        return formatFileSize(size, 2);
     }
 
-    //自定义精度
+    /**
+     * 文件大小单位标准化：自定义精度
+     *
+     * @param size
+     * @param scale 精度
+     * @return
+     */
     public static String formatFileSize(long size, int scale) {
         long kiloByte = size / 1024;
         if (kiloByte < 1) {
@@ -294,59 +298,50 @@ public class ConvertUtil {
     }
 
     //============================================时间单位转换=======================================
-    //get the hh:mm:ss from millSecs
-    public static String formatTime(long millSec){
-        int seconds =(int) millSec/1000;
-        int hour, sec, min;
-        String hours, secs, mins;
 
-        if(seconds>60*60){//1 hour
-            hour = seconds/3600;
-            min = (seconds - hour*3600)/60;
-            sec = seconds - hour*3600 - min*60;
+    /**
+     * 将毫秒转换为 (hh:)mm:ss 格式
+     *
+     * @param millSec
+     * @return
+     */
+    public static String formatTime(long millSec) {
+        int seconds = (int) millSec / 1000;
+        int h, m, s;
+        String sH, sM, sS;
 
-            if(hour<10){
-                hours = "0" + hour;
-            }else{
-                hours = Integer.toString(hour);
-            }
-            if(min<10){
-                mins = "0" + min;
-            }else{
-                mins = Integer.toString(min);
-            }
-            if(sec<10){
-                secs = "0" + sec;
-            }else{
-                secs = Integer.toString(sec);
-            }
+        if (seconds > 60 * 60) {//1 hour
+            h = seconds / 3600;
+            m = (seconds - h * 3600) / 60;
+            s = seconds - h * 3600 - m * 60;
 
-            return hours+":"+mins+":"+secs;
-        }
-        else{
-            min = seconds/60;
-            sec = seconds - min*60;
-            if(min<10){
-                mins = "0" + min;
-            }else{
-                mins = Integer.toString(min);
-            }
-            if(sec<10){
-                secs = "0" + sec;
-            }else{
-                secs = Integer.toString(sec);
-            }
+            sH = formatDigit(h);
+            sM = formatDigit(m);
+            sS = formatDigit(s);
 
-            return mins+":"+secs;
+            return sH + ":" + sM + ":" + sS;
+        } else {
+            m = seconds / 60;
+            s = seconds - m * 60;
+
+            sM = formatDigit(m);
+            sS = formatDigit(s);
+
+            return sM + ":" + sS;
         }
     }
 
-    //两位补全
-    public static String completeTime(int time){
-        if(time>9){
-            return String.valueOf(time);
-        }else {
-            return "0" + time;
+    /**
+     * 两位补全：0-9 -> 00-09
+     *
+     * @param digit
+     * @return
+     */
+    public static String formatDigit(int digit) {
+        if (digit < 10) {
+            return "0" + digit;
+        } else {
+            return String.valueOf(digit);
         }
     }
 
@@ -355,14 +350,23 @@ public class ConvertUtil {
     //density = dpi / 160 ;
     //dpi = px / inch;(dot per inch)
 
-    //px = dp * density
-    //dp to px
+    /**
+     * dp to px: px = dp * density
+     * @param context
+     * @param dp
+     * @return
+     */
     public static float dp2px(Context context, float dp) {
         final float density = context.getResources().getDisplayMetrics().density;
         return dp * density;
     }
 
-    //px = dp * (dpi / 160)
+    /**
+     * dp to px: px = dp * (dpi / 160)
+     * @param context
+     * @param dp
+     * @return
+     */
     public static float dp2px2(Context context, float dp) {
         int dpi = context.getResources().getDisplayMetrics().densityDpi;
         return dp * (dpi / 160f);
@@ -372,8 +376,12 @@ public class ConvertUtil {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
     }
 
-    //dp = px / density;
-    //px to dp
+    /**
+     * px to dp: dp = px / density;
+     * @param context
+     * @param px
+     * @return
+     */
     public static float px2dp(Context context, float px) {
         final float density = context.getResources().getDisplayMetrics().density;
         return px / density;
@@ -384,19 +392,27 @@ public class ConvertUtil {
         return px / (dpi / 160f);
     }
 
-    //px = sp * scaledDensity;
-    //sp to px
+    /**
+     * sp to px : px = sp * scaledDensity;
+     * @param context
+     * @param sp
+     * @return
+     */
     public static float sp2px(Context context, float sp) {
         float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
-        return sp  * scaledDensity;
+        return sp * scaledDensity;
     }
 
     public static float sp2px2(Context context, float sp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
     }
 
-    //sp = px / scaledDensity;
-    //px to sp
+    /**
+     * px to sp: sp = px / scaledDensity;
+     * @param context
+     * @param px
+     * @return
+     */
     public static float px2sp(Context context, float px) {
         float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
         return px / scaledDensity;
@@ -407,13 +423,22 @@ public class ConvertUtil {
     }
 
     //=======================温度： 华氏 ~ 摄氏度 Fahrenheit, Centigrade=============================
-    //C=（5/9）（F-32）
-    public static float fahrenheit2Centigrade(float f){
-        return (5/9f) * (f-32f);
+    /**
+     * 华氏 转 摄氏度: C =（5/9）（F-32）
+     * @param f
+     * @return
+     */
+    public static float fahrenheit2Centigrade(float f) {
+        return (5 / 9f) * (f - 32f);
     }
 
-    public static float centigrade2Fahrenheit(float c){
-        return c*1.8f + 32;
+    /**
+     * 摄氏 转 度华氏:F = C * 1.8f + 32;
+     * @param c
+     * @return
+     */
+    public static float centigrade2Fahrenheit(float c) {
+        return c * 1.8f + 32;
     }
 
 }

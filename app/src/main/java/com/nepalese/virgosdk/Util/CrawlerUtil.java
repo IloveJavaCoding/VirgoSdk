@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.nepalese.virgosdk.Manager.Constants;
+import com.nepalese.virgosdk.Util.RegexUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,8 +24,8 @@ import java.util.regex.Pattern;
  * @author nepalese on 2020/11/30 10:56
  * @usage 网页链接爬取
  */
-public class WebCrawlUtil {
-    private static final String TAG = "WebCrawlUtil";
+public class CrawlerUtil {
+    private static final String TAG = "CrawlerUtil";
 
     public static final int TYPE_LINK_ALL = 1;
     public static final int TYPE_LINK_IMG = 2;
@@ -158,7 +159,7 @@ public class WebCrawlUtil {
 
     private static List<String> crawlImage2(String html){
         if(!TextUtils.isEmpty(html)){
-            List<String> urls = MatchUtil.matchNumsUrl(html);
+            List<String> urls = RegexUtil.matchNumsUrl(html);
             return filterUrl(urls);
         } else{
             Log.e(TAG, "crawlWebPage: 网页内容为空");

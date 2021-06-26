@@ -1,4 +1,4 @@
-package com.nepalese.virgosdk.Util;
+package com.nepalese.virgosdk.Other;
 
 import java.math.BigDecimal;
 

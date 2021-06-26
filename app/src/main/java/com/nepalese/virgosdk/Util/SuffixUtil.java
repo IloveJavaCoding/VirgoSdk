@@ -8,7 +8,7 @@ import android.text.TextUtils;
 
 import com.nepalese.virgosdk.Manager.Constants;
 
-public class PathUtil {
+public class SuffixUtil {
     public static final int TYPE_IMAGE = 1;//图片
     public static final int TYPE_AUDIO = 2;//音频
     public static final int TYPE_VIDEO = 3;//视频
@@ -66,7 +66,7 @@ public class PathUtil {
     /**
      * 获取url链接协议类型：
      * @param url
-     * @return http、https...
+     * @return http、https:...
      */
     public static String getUrlScheme(String url){
         if(TextUtils.isEmpty(url)) return null;
