@@ -82,6 +82,9 @@ public class SystemUtil {
     public static void reBoot(){
         String cmd = "reboot";
         RuntimeExec.getInstance().executeCommand(cmd);
+		
+		//PowerManager pManager=(PowerManager) getSystemService(Context.POWER_SERVICE);  
+        //pManager.reboot("重启"); 
     }
 
     /**
